@@ -31,12 +31,12 @@ class App extends Component {
       //"proxy": "http://localhost:5000/"
       //"proxy": "https://tranquil-caverns-41069.herokuapp.com/"
 
-      const versionText;
-      if (this.state.data == null) {
-        versionText = "Loading ...";
-      } else {
-        versionText = this.state.data
-      }
+    const versionText = "Loading ...";
+    //if (this.state.data == null) {
+    //  versionText = "Loading ...";
+    //} else {
+    //  versionText = this.state.data
+    //}
 
     return(
       <div className="App">
