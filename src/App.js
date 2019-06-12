@@ -31,7 +31,7 @@ class App extends Component {
       //"proxy": "http://localhost:5000/"
       //"proxy": "https://tranquil-caverns-41069.herokuapp.com/"
 
-    const versionText = "";
+    var versionText;
     if (this.state.data == null) {
       versionText = "Loading ...";
     } else {
