@@ -12,9 +12,9 @@ class App extends Component {
   }
   
   componentDidMount() {
-    //this.callBackendAPI()
-    //  .then(res => this.setState({ data: res.version }))
-    //  .catch(err => console.log(err));
+    this.callBackendAPI()
+      .then(res => this.setState({ data: res.version }))
+      .catch(err => console.log(err));
   }
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   callBackendAPI = async() => {
