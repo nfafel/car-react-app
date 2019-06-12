@@ -12,9 +12,9 @@ class App extends Component {
   }
   
   componentDidMount() {
-    this.callBackendAPI()
-      .then(res => this.setState({ data: res.version }))
-      .catch(err => console.log(err));
+    //this.callBackendAPI()
+    //  .then(res => this.setState({ data: res.version }))
+    //  .catch(err => console.log(err));
   }
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   callBackendAPI = async() => {
@@ -36,7 +36,11 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
-          <p>{this.state.data}</p>
+          if (this.state.data == null) {
+            <p>Loading ...</p>
+          } else {
+            <p>{this.state.data}</p>
+          }
         </header>
       
         <p className="App-intro"></p>
