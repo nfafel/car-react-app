@@ -31,16 +31,19 @@ class App extends Component {
       //"proxy": "http://localhost:5000/"
       //"proxy": "https://tranquil-caverns-41069.herokuapp.com/"
 
+      const versionText;
+      if (this.state.data == null) {
+        versionText = "Loading ...";
+      } else {
+        versionText = this.state.data
+      }
+
     return(
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
-          if (this.state.data == null) {
-            <p>Loading ...</p>
-          } else {
-            <p>{this.state.data}</p>
-          }
+          <p>{versionText}</p>
         </header>
       
         <p className="App-intro"></p>
