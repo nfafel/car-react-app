@@ -35,7 +35,7 @@ class App extends Component {
     if (this.state.data == null) {
       versionText = "Loading ...";
     } else {
-      versionText = this.state.data;
+      versionText = this.state.data + " hello ";
     }
 
     return(
