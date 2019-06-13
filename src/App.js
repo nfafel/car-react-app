@@ -10,9 +10,8 @@ class App extends Component {
       version: null,
       cars: null
     }
+    this.shouldGetPostData = false;
   }
-
-  shouldGetPostData = false;
   
   componentDidMount() {
     this.getVersionData()
