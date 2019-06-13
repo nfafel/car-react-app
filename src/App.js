@@ -80,7 +80,7 @@ class App extends Component {
     //Look up html forms for getting data about requests
 
     const tableStyles = {
-      "width": "100%",
+      "width": "80%",
       "border-collapse": "collapse",
       "border": "1px solid #dddddd"
     }
@@ -93,11 +93,6 @@ class App extends Component {
           <p>{versionText}</p>
         </header>
 
-        <button type="button" onclick="getGetData()">GET</button>
-        <button type="button" onclick="getPostData()">POST</button>
-        <button type="button" onclick="getPutData()">PUT</button>
-        <button type="button" onclick="getDeleteData()">DELETE</button>
-
         <table style={tableStyles}>
           <tr>
             <th>Make</th>
@@ -107,6 +102,11 @@ class App extends Component {
           </tr>
           {carsDisplay}
         </table>
+
+        <button type="button" onclick="getGetData()">GET</button>
+        <button type="button" onclick="getPostData()">POST</button>
+        <button type="button" onclick="getPutData()">PUT</button>
+        <button type="button" onclick="getDeleteData()">DELETE</button>
 
       </div>
     );
