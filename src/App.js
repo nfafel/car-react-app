@@ -49,7 +49,7 @@ class App extends Component {
       year: "",
       rating: ""
     }])
-    setState({cars: carsPlusRow});
+    this.setState({cars: carsPlusRow});
   }
 
   getDeleteData(){
