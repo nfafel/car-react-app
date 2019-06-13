@@ -12,7 +12,7 @@ class App extends Component {
     }
   }
 
-  getPostData = false;
+  shouldGetPostData = false;
   
   componentDidMount() {
     this.getVersionData()
@@ -45,7 +45,7 @@ class App extends Component {
   };
 
   getPostData() {
-    this.getPostData = true;
+    this.shouldGetPostData = true;
   }
 
   getDeleteData(){
@@ -89,7 +89,7 @@ class App extends Component {
           <td>{car.rating}</td>
         </tr>
       ));
-      if (this.getPostData) {
+      if (this.shouldGetPostData) {
         carsDisplay.push([
           <tr style={rowColStyles}>
             <td></td>
@@ -98,6 +98,7 @@ class App extends Component {
             <td></td>
           </tr>
         ]);
+        this.shouldGetPostData = false;
       }
     }
 
