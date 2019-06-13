@@ -109,10 +109,10 @@ class App extends Component {
           {carsDisplay}
         </table>
 
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getGetData()">GET</button>
-        <button type="button" onclick="getPostData()">POST</button>
-        <button type="button" onclick="getPutData()">PUT</button>
-        <button type="button" onclick="getDeleteData()">DELETE</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">POST</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPutData()">PUT</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onclick="getDeleteData()">DELETE</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">Submit</button>
 
       </div>
     );
