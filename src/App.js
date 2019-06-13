@@ -68,7 +68,12 @@ class App extends Component {
       carsDisplay = <p>"Loading ..."</p>;
     } else {
       carsDisplay = this.state.cars.map((car) => (
-        <p>Make:{car.make}  Model:{car.model}  Year:{car.year}  Rating:{car.rating}</p>
+        <tr>
+          <td>{car.make}</td>
+          <td>{car.model}</td>
+          <td>{car.year}</td>
+          <td>{car.rating}</td>
+        </tr>
       ));
     }
     
@@ -85,9 +90,15 @@ class App extends Component {
         <button type="button" onclick="getPostData()">POST</button>
         <button type="button" onclick="getPutData()">PUT</button>
         <button type="button" onclick="getDeleteData()">DELETE</button>
-        <div>
+        <table style="width:100%">
+          <tr>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Year</th>
+            <th>Rating</th>
+          </tr>
           {carsDisplay}
-        </div>
+        </table>
         <p className="App-intro">Beneath is where request info will be made and appear</p>
       </div>
     );
