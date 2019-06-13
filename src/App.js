@@ -68,7 +68,7 @@ class App extends Component {
       carsDisplay = <p>"Loading ..."</p>;
     } else {
       carsDisplay = this.state.cars.map((car) => (
-        <p>Make:{car.name}  Model:{car.country}  Year:{car.year}  Rating:{car.rating}</p>
+        <p>Make:{car.make}  Model:{car.model}  Year:{car.year}  Rating:{car.rating}</p>
       ));
     }
     
