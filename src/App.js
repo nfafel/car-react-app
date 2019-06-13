@@ -43,12 +43,13 @@ class App extends Component {
   };
 
   getPostData() {
-    this.state.cars.push({
+    setState({cars: this.state.cars.push({
       make: "",
       model: "",
       year: "",
       rating: ""
-    });
+    })});
+    
     this.render();
   }
 
