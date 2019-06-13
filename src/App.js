@@ -63,12 +63,24 @@ class App extends Component {
       versionText = this.state.version;
     }
 
+    const tableStyles = {
+      "width": "80%",
+      "border-collapse": "collapse",
+      "border": "1px solid #dddddd",
+      "margin-top": ".5em"
+    }
+
+    const rowColStyles = {
+      "border-collapse": "collapse",
+      "border": "1px solid #dddddd"
+    }
+
     var carsDisplay;
     if (this.state.cars == null) {
       carsDisplay = <p>"Loading ..."</p>;
     } else {
       carsDisplay = this.state.cars.map((car) => (
-        <tr>
+        <tr style={rowColStyles}>
           <td>{car.make}</td>
           <td>{car.model}</td>
           <td>{car.year}</td>
@@ -79,12 +91,6 @@ class App extends Component {
     
     //Look up html forms for getting data about requests
 
-    const tableStyles = {
-      "width": "80%",
-      "border-collapse": "collapse",
-      "border": "1px solid #dddddd"
-    }
-
     return(
       <div className="App">
         <header className="App-header">
@@ -94,7 +100,7 @@ class App extends Component {
         </header>
 
         <table style={tableStyles}>
-          <tr>
+          <tr style={rowColStyles}>
             <th>Make</th>
             <th>Model</th>
             <th>Year</th>
