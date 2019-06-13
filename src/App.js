@@ -93,7 +93,7 @@ class App extends Component {
 
     return(
       <div className="App">
-        <header className="App-header">
+        <header className="App-header" style={{"height":"50%"}}>
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
           <p>{versionText}</p>
