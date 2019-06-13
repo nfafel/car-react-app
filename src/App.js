@@ -28,8 +28,6 @@ class App extends Component {
   };
 
   render() {
-      //"proxy": "http://localhost:5000/"
-      //"proxy": "https://tranquil-caverns-41069.herokuapp.com/"
 
     var versionText;
     if (this.state.data == null) {
@@ -45,8 +43,11 @@ class App extends Component {
           <h1 className="App-title">Welcome to React</h1>
           <p>{versionText}</p>
         </header>
-      
-        <p className="App-intro"></p>
+        <button type="button">GET</button>
+        <button type="button">POST</button>
+        <button type="button">PUT</button>
+        <button type="button">DELETE</button>
+        <p className="App-intro">This is where request info will be made and appear</p>
       </div>
     );
   }
