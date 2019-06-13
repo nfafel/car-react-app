@@ -11,6 +11,8 @@ class App extends Component {
       cars: null
     }
   }
+
+  getPostData = false;
   
   componentDidMount() {
     this.getVersionData()
@@ -43,13 +45,7 @@ class App extends Component {
   };
 
   getPostData() {
-    var carsPlusRow = this.state.cars.concat([{
-      make: "",
-      model: "",
-      year: "",
-      rating: ""
-    }])
-    this.setState({cars: carsPlusRow});
+    this.getPostData = true;
   }
 
   getDeleteData(){
@@ -93,6 +89,16 @@ class App extends Component {
           <td>{car.rating}</td>
         </tr>
       ));
+      if (this.getPostData) {
+        carsDisplay.push([
+          <tr style={rowColStyles}>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        ]);
+      }
     }
 
     //Look up html forms for getting data about requests
