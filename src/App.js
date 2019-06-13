@@ -57,10 +57,10 @@ class App extends Component {
   render() {
 
     var versionText;
-    if (this.state.data == null) {
+    if (this.state.version == null) {
       versionText = "Loading ...";
     } else {
-      versionText = this.state.data;
+      versionText = this.state.version;
     }
 
     var carsDisplay;
