@@ -3,14 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
-
   constructor(props){
     super(props);
     this.state = {
       version: null,
-      cars: null
+      cars: null,
+      shouldGetPostData: "false"
     }
-    this.shouldGetPostData = false;
   }
   
   componentDidMount() {
@@ -44,14 +43,18 @@ class App extends Component {
   };
 
   getPostData() {
-    this.shouldGetPostData = true;
+    this.setState({shouldGetPostData: "true"});
   }
 
-  getDeleteData(){
-
+  getDeleteData = () => {
+    alert("whatup");
   }
 
   getPutData() {
+
+  }
+
+  getSubmitData() {
 
   }
 
@@ -85,19 +88,37 @@ class App extends Component {
           <td>{car.make}</td>
           <td>{car.model}</td>
           <td>{car.year}</td>
-          <td>{car.rating}</td>
+          <td> {car.rating} </td>
+          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData()}>EDIT</button>
+          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getDeleteData()}>DELETE</button> 
         </tr>
       ));
-      if (this.shouldGetPostData) {
+      if (this.state.shouldGetPostData === "true") {
         carsDisplay.push([
           <tr style={rowColStyles}>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>
+              <form>
+                <input type="text" name="make" value="make"></input>
+              </form>
+            </td>
+            <td>
+              <form>
+                <input type="text" name="model" value="model"></input>
+              </form>
+            </td>
+            <td>
+              <form>
+                <input type="text" name="year" value="year"></input>
+              </form>
+            </td>
+            <td>
+              <form>
+                <input type="text" name="rating" value="rating"></input>
+              </form>
+            </td>
+            <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getSubmitData()}>SUMBIT</button> </td>
           </tr>
         ]);
-        this.shouldGetPostData = false;
       }
     }
 
@@ -107,7 +128,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header" style={{"height":"50%"}}>
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">{this.shouldGetPostData}</h1>
+          <h1 className="App-title">hello {this.state.shouldGetPostData} world</h1>
           <p>{versionText}</p>
         </header>
 
@@ -117,14 +138,12 @@ class App extends Component {
             <th>Model</th>
             <th>Year</th>
             <th>Rating</th>
+            <th>Action</th>
           </tr>
           {carsDisplay}
         </table>
 
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">POST</button>
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPutData()">PUT</button>
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getDeleteData()">DELETE</button>
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">SUMBIT</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData()}>NEW CAR</button>
 
       </div>
     );
