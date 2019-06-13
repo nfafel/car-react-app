@@ -85,6 +85,10 @@ class App extends Component {
       "border": "1px solid"
     }
 
+    const rowStyles = {
+
+    }
+
     return(
       <div className="App">
         <header className="App-header">
@@ -98,7 +102,7 @@ class App extends Component {
         <button type="button" onclick="getPutData()">PUT</button>
         <button type="button" onclick="getDeleteData()">DELETE</button>
 
-        <table style={{"width": "80%"}}>
+        <table style={tableStyles}>
           <tr>
             <th>Make</th>
             <th>Model</th>
