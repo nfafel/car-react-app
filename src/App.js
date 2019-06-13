@@ -32,7 +32,7 @@ class App extends Component {
     return body;
   };
 
-  getcarsData = async() => {
+  getCarsData = async() => {
     const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
     const body = await response.json();
 
