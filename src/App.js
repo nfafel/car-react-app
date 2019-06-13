@@ -86,11 +86,13 @@ class App extends Component {
           <h1 className="App-title">Welcome to React</h1>
           <p>{versionText}</p>
         </header>
+
         <button type="button" onclick="getGetData()">GET</button>
         <button type="button" onclick="getPostData()">POST</button>
         <button type="button" onclick="getPutData()">PUT</button>
         <button type="button" onclick="getDeleteData()">DELETE</button>
-        <table style="width:100%">
+
+        <table style={{"width": "100%"}}>
           <tr>
             <th>Make</th>
             <th>Model</th>
@@ -99,7 +101,7 @@ class App extends Component {
           </tr>
           {carsDisplay}
         </table>
-        <p className="App-intro">Beneath is where request info will be made and appear</p>
+
       </div>
     );
   }
