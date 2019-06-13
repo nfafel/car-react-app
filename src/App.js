@@ -43,14 +43,13 @@ class App extends Component {
   };
 
   getPostData() {
-    setState({cars: this.state.cars.push({
+    var carsPlusRow = this.state.cars.concat([{
       make: "",
       model: "",
       year: "",
       rating: ""
-    })});
-    
-    this.render();
+    }])
+    setState({cars: carsPlusRow});
   }
 
   getDeleteData(){
