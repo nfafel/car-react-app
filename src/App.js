@@ -42,15 +42,21 @@ class App extends Component {
     return body;
   };
 
+  getPostData() {
+    this.state.cars.push({
+      make: "",
+      model: "",
+      year: "",
+      rating: ""
+    });
+    this.render();
+  }
+
   getDeleteData(){
 
   }
 
   getPutData() {
-
-  }
-
-  getPostData() {
 
   }
 
@@ -88,7 +94,7 @@ class App extends Component {
         </tr>
       ));
     }
-    
+
     //Look up html forms for getting data about requests
 
     return(
@@ -112,7 +118,7 @@ class App extends Component {
         <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">POST</button>
         <button type="button" style={{"margin-bottom":"1em"}} onclick="getPutData()">PUT</button>
         <button type="button" style={{"margin-bottom":"1em"}} onclick="getDeleteData()">DELETE</button>
-        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">Submit</button>
+        <button type="button" style={{"margin-bottom":"1em"}} onclick="getPostData()">SUMBIT</button>
 
       </div>
     );
