@@ -82,11 +82,7 @@ class App extends Component {
     const tableStyles = {
       "width": "100%",
       "border-collapse": "collapse",
-      "border": "1px solid"
-    }
-
-    const rowStyles = {
-
+      "border": "1px solid #dddddd"
     }
 
     return(
