@@ -67,7 +67,7 @@ class App extends Component {
       "width": "80%",
       "border-collapse": "collapse",
       "border": "1px solid #dddddd",
-      "margin-top": ".5em"
+      "margin": "1em auto"
     }
 
     const rowColStyles = {
