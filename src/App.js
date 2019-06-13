@@ -79,6 +79,12 @@ class App extends Component {
     
     //Look up html forms for getting data about requests
 
+    const tableStyles = {
+      "width": "100%",
+      "border-collapse": "collapse",
+      "border": "1px solid"
+    }
+
     return(
       <div className="App">
         <header className="App-header">
@@ -92,7 +98,7 @@ class App extends Component {
         <button type="button" onclick="getPutData()">PUT</button>
         <button type="button" onclick="getDeleteData()">DELETE</button>
 
-        <table style={{"width": "100%"}}>
+        <table style={{"width": "80%"}}>
           <tr>
             <th>Make</th>
             <th>Model</th>
