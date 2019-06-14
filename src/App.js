@@ -58,9 +58,21 @@ class App extends Component {
 
   }
 
-  async getSubmitData() {
+  getSubmitData() {
     //Make a POST request with new car state variables
-    fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
+    this.postData()
+      .then(res => this.setState({ 
+          cars: res.cars,
+          newCarMake: null,
+          newCarModel: null,
+          newCarYear: null,
+          newCarRating: null
+        }))
+      .catch(err => console.log(err));
+  }
+
+  postData = async() => {
+    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -72,9 +84,16 @@ class App extends Component {
         year: this.state.newCarYear,
         rating: this.state.newCarRating
       })
+    });
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body) 
     }
-    );
+    this.state.shouldGetPostData = "false"
+    return body;
   }
+
 
   newCarMakeChange(e) {
     this.setState({newCarMake: e.target.value});
