@@ -8,7 +8,11 @@ class App extends Component {
     this.state = {
       version: null,
       cars: null,
-      shouldGetPostData: "false"
+      shouldGetPostData: "false",
+      newCarMake: null,
+      newCarModel: null,
+      newCarYear: null,
+      newCarRating: null
     }
   }
   
@@ -54,8 +58,35 @@ class App extends Component {
 
   }
 
-  getSubmitData() {
+  async getSubmitData() {
+    //Make a POST request with new car state variables
+    fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        make: this.state.newCarMake,
+        model: this.state.newCarModel,
+        year: this.state.newCarYear,
+        rating: this.state.newCarRating
+      })
+    }
+    );
+  }
 
+  newCarMakeChange(e) {
+    this.setState({newCarMake: e.target.value});
+  }
+  newCarModelChange(e) {
+    this.setState({newCarModel: e.target.value});
+  }
+  newCarYearChange(e) {
+    this.setState({newCarYear: e.target.value});
+  }
+  newCarRatingChange(e) {
+    this.setState({newCarRating: e.target.value});
   }
 
   render() {
@@ -98,22 +129,22 @@ class App extends Component {
           <tr style={rowColStyles}>
             <td>
               <form>
-                <input type="text" name="make" value="make"></input>
+                <input type="text" name="make" value={this.state.newCarMake} onChange={(e) => this.newCarMakeChange(e)}></input>
               </form>
             </td>
             <td>
               <form>
-                <input type="text" name="model" value="model"></input>
+                <input type="text" name="model" value={this.state.newCarModel} onChange={(e) => this.newCarModelChange(e)}></input>
               </form>
             </td>
             <td>
               <form>
-                <input type="text" name="year" value="year"></input>
+                <input type="text" name="year" value={this.state.newCarYear} onChange={(e) => this.newCarYearChange(e)}></input>
               </form>
             </td>
             <td>
               <form>
-                <input type="text" name="rating" value="rating"></input>
+                <input type="text" name="rating" value={this.state.newCarRating} onChange={(e) => this.newCarRatingChange(e)}></input>
               </form>
             </td>
             <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getSubmitData()}>SUMBIT</button> </td>
@@ -122,13 +153,11 @@ class App extends Component {
       }
     }
 
-    //Look up html forms for getting data about requests
-
     return(
       <div className="App">
         <header className="App-header" style={{"height":"50%"}}>
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">hello {this.state.shouldGetPostData} world</h1>
+          <h1 className="App-title">Welcome to React</h1>
           <p>{versionText}</p>
         </header>
 
