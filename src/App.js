@@ -8,7 +8,9 @@ class App extends Component {
     this.state = {
       version: null,
       cars: null,
-      shouldGetPostData: "false",
+      shouldGetPostData: false,
+      shouldGetPutData: false,
+      carIdUpdate: null,
       newCarMake: null,
       newCarModel: null,
       newCarYear: null,
@@ -46,23 +48,83 @@ class App extends Component {
     return body;
   };
 
+  callDeleteData(carId) {
+    this.deleteData(carId)
+      .then(res => this.setState({ cars: res.cars }))
+      .catch(err => console.log(err));
+  }
+
+  deleteData = async(carId) => {
+    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
+      method: 'DELETE'
+    });
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body) 
+    }
+    return body;
+  }
+
+  getPutData(car) {
+    this.setState({
+      shouldGetPutData: true,
+      carIdUpdate: car.id,
+      newCarMake: car.make,
+      newCarModel: car.model,
+      newCarYear: car.year,
+      newCarRating: car.rating
+    });
+  }
+
+  callPutData(carId) {
+    this.putData(carId)
+    .then(res => this.setState({ 
+        cars: res.cars,
+        shouldGetPostData: false,
+        shouldGetPutData: false,
+        carIdUpdate: null,
+        newCarMake: null,
+        newCarModel: null,
+        newCarYear: null,
+        newCarRating: null
+      }))
+    .catch(err => console.log(err));
+  }
+
+  putData = async(carId) => {
+    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        make: this.state.newCarMake,
+        model: this.state.newCarModel,
+        year: this.state.newCarYear,
+        rating: this.state.newCarRating
+      })
+    });
+    const body = await response.json();
+
+    if (response.status !== 200) {
+      throw Error(body) 
+    }
+    return body;
+  }
+
   getPostData() {
-    this.setState({shouldGetPostData: "true"});
+    this.setState({shouldGetPostData: true});
   }
 
-  getDeleteData = () => {
-    alert("whatup");
-  }
-
-  getPutData() {
-
-  }
-
-  getSubmitData() {
-    //Make a POST request with new car state variables
+  callPostData() {
     this.postData()
       .then(res => this.setState({ 
           cars: res.cars,
+          shouldGetPostData: false,
+          shouldGetPutData: false,
+          carIdUpdate: null,
           newCarMake: null,
           newCarModel: null,
           newCarYear: null,
@@ -90,10 +152,8 @@ class App extends Component {
     if (response.status !== 200) {
       throw Error(body) 
     }
-    this.state.shouldGetPostData = "false"
     return body;
   }
-
 
   newCarMakeChange(e) {
     this.setState({newCarMake: e.target.value});
@@ -108,6 +168,77 @@ class App extends Component {
     this.setState({newCarRating: e.target.value});
   }
 
+  tableStyles() {
+    return ({
+      "width": "80%",
+      "border-collapse": "collapse",
+      "border": "1px solid #dddddd",
+      "margin": "1em auto"
+    });
+  };
+
+  rowColStyles() {
+    return ({
+      "border-collapse": "collapse",
+      "border": "1px solid #dddddd"
+    });
+  };
+
+  updateRowForm = (carId) => {
+    return (
+    <tr style={this.rowColStyles()}>
+      <td>
+        <form>
+          <input type="text" name="make" value={this.state.newCarMake} onChange={(e) => this.newCarMakeChange(e)}></input>
+        </form>
+      </td>
+      <td>
+        <form>
+          <input type="text" name="model" value={this.state.newCarModel} onChange={(e) => this.newCarModelChange(e)}></input>
+        </form>
+      </td>
+      <td>
+        <form>
+          <input type="text" name="year" value={this.state.newCarYear} onChange={(e) => this.newCarYearChange(e)}></input>
+        </form>
+      </td>
+      <td>
+        <form>
+          <input type="text" name="rating" value={this.state.newCarRating} onChange={(e) => this.newCarRatingChange(e)}></input>
+        </form>
+      </td>
+      <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callPutData(carId)}>UPDATE</button> </td>
+    </tr>);
+  }
+
+  newCarForm() {
+    return (
+      <tr style={this.rowColStyles()}>
+        <td>
+          <form>
+            <input type="text" name="make" value={this.state.newCarMake} onChange={(e) => this.newCarMakeChange(e)}></input>
+          </form>
+        </td>
+        <td>
+          <form>
+            <input type="text" name="model" value={this.state.newCarModel} onChange={(e) => this.newCarModelChange(e)}></input>
+          </form>
+        </td>
+        <td>
+          <form>
+            <input type="text" name="year" value={this.state.newCarYear} onChange={(e) => this.newCarYearChange(e)}></input>
+          </form>
+        </td>
+        <td>
+          <form>
+            <input type="text" name="rating" value={this.state.newCarRating} onChange={(e) => this.newCarRatingChange(e)}></input>
+          </form>
+        </td>
+        <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callPostData()}>SUMBIT</button> </td>
+      </tr>
+      );
+  }
+
   render() {
 
     var versionText;
@@ -117,58 +248,27 @@ class App extends Component {
       versionText = this.state.version;
     }
 
-    const tableStyles = {
-      "width": "80%",
-      "border-collapse": "collapse",
-      "border": "1px solid #dddddd",
-      "margin": "1em auto"
-    }
-
-    const rowColStyles = {
-      "border-collapse": "collapse",
-      "border": "1px solid #dddddd"
-    }
-
     var carsDisplay;
     if (this.state.cars == null) {
-      carsDisplay = <p>"Loading ..."</p>;
+      carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
     } else {
-      carsDisplay = this.state.cars.map((car) => (
-        <tr style={rowColStyles}>
-          <td>{car.make}</td>
-          <td>{car.model}</td>
-          <td>{car.year}</td>
-          <td> {car.rating} </td>
-          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData()}>EDIT</button>
-          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getDeleteData()}>DELETE</button> 
-        </tr>
-      ));
-      if (this.state.shouldGetPostData === "true") {
-        carsDisplay.push([
-          <tr style={rowColStyles}>
-            <td>
-              <form>
-                <input type="text" name="make" value={this.state.newCarMake} onChange={(e) => this.newCarMakeChange(e)}></input>
-              </form>
-            </td>
-            <td>
-              <form>
-                <input type="text" name="model" value={this.state.newCarModel} onChange={(e) => this.newCarModelChange(e)}></input>
-              </form>
-            </td>
-            <td>
-              <form>
-                <input type="text" name="year" value={this.state.newCarYear} onChange={(e) => this.newCarYearChange(e)}></input>
-              </form>
-            </td>
-            <td>
-              <form>
-                <input type="text" name="rating" value={this.state.newCarRating} onChange={(e) => this.newCarRatingChange(e)}></input>
-              </form>
-            </td>
-            <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getSubmitData()}>SUMBIT</button> </td>
-          </tr>
-        ]);
+      carsDisplay = this.state.cars.map((car) => { 
+        if (this.state.shouldGetPutData && car.id == this.state.carIdUpdate) {
+          return (this.updateRowForm(car.id));
+        } else {
+          return (
+          <tr style={this.rowColStyles()}>
+            <td>{car.make}</td>
+            <td>{car.model}</td>
+            <td>{car.year}</td>
+            <td> {car.rating} </td>
+            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car)}>EDIT</button>
+            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car.id)}>DELETE</button> 
+          </tr>)
+        }
+      });
+      if (this.state.shouldGetPostData) {
+        carsDisplay.push([this.newCarForm()]);
       }
     }
 
@@ -180,8 +280,8 @@ class App extends Component {
           <p>{versionText}</p>
         </header>
 
-        <table style={tableStyles}>
-          <tr style={rowColStyles}>
+        <table style={this.tableStyles()}>
+          <tr style={this.rowColStyles()}>
             <th>Make</th>
             <th>Model</th>
             <th>Year</th>
