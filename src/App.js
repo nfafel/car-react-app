@@ -23,11 +23,12 @@ class App extends Component {
       .then(res => this.setState({ version: res.version }))
       .catch(err => console.log(err));
 
-      this.getCarsData()
-        .then(res => this.setState({ cars: res.cars }))
-        .catch(err => console.log(err));
+    this.getCarsData()
+      .then(res => this.setState({ cars: res.cars }))
+      .catch(err => console.log(err));
   }
-    // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
+
+  // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   getVersionData = async() => {
     const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/version');
     const body = await response.json();
@@ -50,7 +51,7 @@ class App extends Component {
 
   callDeleteData(carId) {
     this.deleteData(carId)
-      .then(res => this.setState({ cars: res.cars }))
+      .then(res => this.setState({cars: res.cars}))
       .catch(err => console.log(err));
   }
 
@@ -69,7 +70,7 @@ class App extends Component {
   getPutData(car) {
     this.setState({
       shouldGetPutData: true,
-      carIdUpdate: car.id,
+      carIdUpdate: car._id,
       newCarMake: car.make,
       newCarModel: car.model,
       newCarYear: car.year,
@@ -253,8 +254,8 @@ class App extends Component {
       carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
     } else {
       carsDisplay = this.state.cars.map((car) => { 
-        if (this.state.shouldGetPutData && car.id == this.state.carIdUpdate) {
-          return (this.updateRowForm(car.id));
+        if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
+          return (this.updateRowForm(car._id));
         } else {
           return (
           <tr style={this.rowColStyles()}>
@@ -263,7 +264,7 @@ class App extends Component {
             <td>{car.year}</td>
             <td> {car.rating} </td>
             <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car)}>EDIT</button>
-            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car.id)}>DELETE</button> 
+            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id)}>DELETE</button> 
           </tr>)
         }
       });
