@@ -235,7 +235,10 @@ class App extends Component {
             <input type="text" name="rating" value={this.state.newCarRating} onChange={(e) => this.newCarRatingChange(e)}></input>
           </form>
         </td>
-        <td><button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callPostData()}>SUMBIT</button> </td>
+        <td>
+          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => {this.setState({shouldGetPostData: false});}}>CANCEL</button>
+          <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callPostData()}>SUMBIT</button> 
+        </td>
       </tr>
       );
   }
