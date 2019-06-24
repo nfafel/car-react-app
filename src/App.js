@@ -169,7 +169,7 @@ class App extends Component {
     });
   };
   
-  updateRowForm = (handleChange, values) => {
+  updateRowForm = (handleChange, values, errors) => {
     return (
       <tr style={this.rowColStyles()}>
           <td>
@@ -179,6 +179,7 @@ class App extends Component {
                   name="make"
                   placeholder="Make">
             </input>
+            {errors.make}
           </td>
           <td>
             <input onChange={handleChange} 
@@ -211,7 +212,7 @@ class App extends Component {
     )
   }
 
-  newCarForm = (handleChange, values) => {
+  newCarForm = (handleChange, values, errors) => {
     return (
       <tr style={this.rowColStyles()}>
           <td>
@@ -252,14 +253,14 @@ class App extends Component {
       </tr>
   )}
 
-  getCarsDisplay = (handleChange, values, setValues) => {
+  getCarsDisplay = (handleChange, values, setValues, errors) => {
     var carsDisplay;
     if (this.state.cars == null) {
       carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
     } else {
       carsDisplay = this.state.cars.map((car) => { 
         if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
-          return (this.updateRowForm(handleChange, values));
+          return (this.updateRowForm(handleChange, values, errors));
         } else {
           return (
           <tr style={this.rowColStyles()}>
@@ -273,7 +274,7 @@ class App extends Component {
         }
       });
       if (this.state.shouldGetPostData) {
-        carsDisplay.push([this.newCarForm(handleChange, values)]);
+        carsDisplay.push([this.newCarForm(handleChange, values, errors)]);
       }
     }
     return carsDisplay;
@@ -306,11 +307,31 @@ class App extends Component {
 
         <Formik
           initialValues = {{make: this.state.newCarMake, model: this.state.newCarModel, year: this.state.newCarYear, rating: this.state.newCarRating}}
+          validate={values => {
+            let errors={};
+            if (!values.make) {
+              errors.make = 'Required';
+            }
+            if (!values.model) {
+              errors.model = 'Required';
+            }
+            if (!values.year) {
+              errors.year = 'Required';
+            } else if (!/^[0-9]{4}/.test(values.year)) {
+              errors.year = 'Must be a valid year';
+            }
+            if (!values.rating) {
+              errors.rating = 'Required';
+            } else if (values.rating < 0 || values.rating > 10) {
+              errors.rating = 'Must be number 0-10';
+            }
+            return errors;
+          }}
           onSubmit = {(values) => {
             this.handleCorrectSumbit(values)
           }}
         >
-        {({ handleSubmit, handleChange, values, setValues }) => (
+        {({ handleSubmit, handleChange, values, setValues, errors }) => (
           <form onSubmit={handleSubmit}>
             <table style={this.tableStyles()}>
               <tr style={this.rowColStyles()}>
@@ -320,7 +341,7 @@ class App extends Component {
                 <th>Rating</th>
                 <th>Action</th>
               </tr>
-              {this.getCarsDisplay(handleChange, values, setValues)}
+              {this.getCarsDisplay(handleChange, values, setValues, errors)}
             </table>
             <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>
           </form>
