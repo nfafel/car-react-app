@@ -170,23 +170,27 @@ class App extends Component {
     });
   };
   
-  updateRowForm = () => {
+  updateRowForm = (values) => {
     return (
       <tr style={this.rowColStyles()}>
           <td>
             <Field type="text" name="make" />
+            <ErrorMessage name="make" />
           </td>
           <td>
             <Field type="text" name="model" />
+            <ErrorMessage name="model" />
           </td>
           <td>
             <Field type="text" name="year" />
+            <ErrorMessage name="year" />
           </td>
           <td>
             <Field type="text" name="rating" />
+            <ErrorMessage name="rating" />
           </td>
           <td>
-            <button type="submit">UPDATE</button>
+            <button type="button" onClick={() => this.callPutData(this.state.carIdUpdate, values)}>UPDATE</button>
           </td>
       </tr>
     )
@@ -218,28 +222,39 @@ class App extends Component {
       </tr>
   )}
 
-  getCarsDisplay = (handleChange, values, setValues, errors) => {
+  getCarsDisplay = (setValues, values) => {
     var carsDisplay;
     if (this.state.cars == null) {
       carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
     } else {
       carsDisplay = this.state.cars.map((car) => { 
         if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
-          return (this.updateRowForm(handleChange, values, errors));
-        } else {
+          return (this.updateRowForm(values));
+        } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
           return (
           <tr style={this.rowColStyles()}>
             <td>{car.make}</td>
             <td>{car.model}</td>
             <td>{car.year}</td>
             <td> {car.rating} </td>
-            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
-            <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id)}>DELETE</button> 
+            <td></td>
           </tr>)
+        } else {
+          return (
+            <tr style={this.rowColStyles()}>
+              <td>{car.make}</td>
+              <td>{car.model}</td>
+              <td>{car.year}</td>
+              <td> {car.rating} </td>
+              <td>
+                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
+                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id)}>DELETE</button> 
+              </td>
+            </tr>)
         }
       });
       if (this.state.shouldGetPostData) {
-        carsDisplay.push([this.newCarForm(handleChange, values, errors)]);
+        carsDisplay.push([this.newCarForm()]);
       }
     }
     return carsDisplay;
@@ -258,11 +273,11 @@ class App extends Component {
       .required('Required'),
     model: Yup.string()
       .required('Required'),
-    year: Yup.number()
+    year: Yup.number('Must be a number')
       .integer('Must be an Integer')
       .min(1885, "Too Old!")
       .required('Required'),
-    rating: Yup.number()
+    rating: Yup.number('Must be a number')
       .positive('Must be positive')
       .integer('Must be an Integer')
       .min(0, 'Rating must be 0-10')
@@ -288,13 +303,13 @@ class App extends Component {
         </header>
 
         <Formik
-          initialValues = {{make: this.state.newCarMake, model: this.state.newCarModel, year: this.state.newCarYear, rating: this.state.newCarRating}}
+          initialValues = {{make: '', model: '', year: '', rating: ''}}
           validationSchema={this.CarValidationSchema}
           onSubmit = {(values) => {
             this.handleCorrectSumbit(values)
           }}
         >
-        {({ handleSubmit, handleChange, values, setValues, errors }) => (
+        {({setValues, values}) => (
           <Form>
             <table style={this.tableStyles()}>
               <tr style={this.rowColStyles()}>
@@ -304,7 +319,7 @@ class App extends Component {
                 <th>Rating</th>
                 <th>Action</th>
               </tr>
-              {this.getCarsDisplay(handleChange, values, setValues, errors)}
+              {this.getCarsDisplay(setValues, values)}
             </table>
             <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>
           </Form>
