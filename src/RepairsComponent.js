@@ -25,8 +25,6 @@ class RepairsComponent extends Component {
             .catch(err => console.log(err));   
     }
   
-    // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
-  
     getCarsData = async() => {
       const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
       const body = await response.json();
@@ -71,7 +69,7 @@ class RepairsComponent extends Component {
             repairIdUpdate: repair._id
         });
         setValues({
-            carId: repair.carId,
+            car: JSON.stringify(repair.car),
             description: repair.description,
             estTime: repair.estTime,
             cost: repair.cost,
@@ -99,7 +97,7 @@ class RepairsComponent extends Component {
             'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                carId: values.carId,
+                car: JSON.parse(values.car),
                 description: values.description,
                 estTime: values.estTime,
                 cost: values.cost,
@@ -118,7 +116,7 @@ class RepairsComponent extends Component {
     getPostData(setValues) {
       this.setState({shouldGetPostData: true});
       setValues({
-        carId: "",
+        car: "",
         description: "",
         estTime: "",
         cost: "",
@@ -146,7 +144,7 @@ class RepairsComponent extends Component {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            carId: values.carId,
+            car: JSON.parse(values.car),
             description: values.description,
             estTime: values.estTime,
             cost: values.cost,
@@ -178,18 +176,31 @@ class RepairsComponent extends Component {
         });
     };
 
-    carOptions = () => {
+    carOptions = (values) => {
         var carOptions;
         if (this.state.cars == null) {
             carOptions = (<p>Loading...</p>);
         } else {
             carOptions = this.state.cars.map((car) => {
-                return (
-                    <option value={car._id}>
-                        {car.year} {car.make} {car.model}
-                    </option>
-                )
+                if (!(this.state.shouldGetPutData && (JSON.stringify(car) === values.car))) {
+                    return (
+                        <option value={JSON.stringify(car)} >
+                            {car.year} {car.make} {car.model}
+                        </option>
+                    )
+                }
             })
+        }
+       
+        if (this.state.shouldGetPutData) {
+            alert(values.car);
+            var chosenCar = JSON.parse(values.car);
+            var chosenCarMake = chosenCar.make;
+            var chosenCarModel = chosenCar.model;
+            var chosenCarYear = chosenCar.year;
+            carOptions.splice(0,0, <option value={values.car}>{chosenCarYear} {chosenCarMake} {chosenCarModel}</option>);
+        } else {
+            carOptions.splice(0,0, <option>Select a Car</option>);
         }
         return carOptions;
     }
@@ -198,10 +209,10 @@ class RepairsComponent extends Component {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-                <Field name="carId" component="select" placeHolder="car">
-                    {this.carOptions()}
+                <Field name="car" component="select">
+                    {this.carOptions(values)}
                 </Field>
-                <ErrorMessage name="carId" />
+                <ErrorMessage name="car" />
             </td>
             <td>
                 <Field type="text" name="description" />
@@ -234,10 +245,10 @@ class RepairsComponent extends Component {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-                <Field name="carId" component="select" placeHolder="car">
+                <Field name="car" component="select" placeHolder="car">
                     {this.carOptions()}
                 </Field>
-                <ErrorMessage name="carId" />
+                <ErrorMessage name="car" />
             </td>
             <td>
                 <Field type="text" name="description" placeHolder="Description" />
@@ -265,12 +276,6 @@ class RepairsComponent extends Component {
             </td>
         </tr>
     )}
-
-    getRepairedCar = async(carId) => {
-        const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`);
-        const body = await response.json();
-        return body;
-    }
   
     getRepairsDisplay = (setValues, values) => {
         var repairsDisplay;
@@ -281,10 +286,9 @@ class RepairsComponent extends Component {
             if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
                 return (this.updateRepairForm(values));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
-                var repairedCar = this.getRepairedCar(repair.carId);
                 return (
                 <tr style={this.rowColStyles()}>
-                <td>{repairedCar} </td>
+                <td>{repair.car.year} {repair.car.make} {repair.car.model}</td>
                 <td>{repair.description}</td>
                 <td>{repair.estTime}</td>
                 <td>{repair.cost}</td>
@@ -293,10 +297,9 @@ class RepairsComponent extends Component {
                 <td></td>
                 </tr>)
             } else {
-                var repairedCar = this.getRepairedCar(repair.carId);
                 return (
                 <tr style={this.rowColStyles()}>
-                    <td>{repairedCar}</td>
+                    <td>{repair.car.year} {repair.car.make} {repair.car.model}</td>
                     <td>{repair.description}</td>
                     <td>{repair.estTime}</td>
                     <td>{repair.cost}</td>
@@ -307,7 +310,7 @@ class RepairsComponent extends Component {
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
                     </td>
                 </tr>)
-          }
+            }
         });
         if (this.state.shouldGetPostData) {
             repairsDisplay.push([this.newRepairForm()]);
@@ -325,13 +328,15 @@ class RepairsComponent extends Component {
     }
   
     RepairValidationSchema = Yup.object().shape({
-        carId: Yup.string()
+        car: Yup.string("No Car Selected")
             .required('Required'),
         description: Yup.string()
             .required('Required'),
-        estTime: Yup.number('Must be a number')
+        estTime: Yup.number()
+            .typeError('Must be a Number')
             .required('Required'),
-        cost: Yup.number('Must be a number')
+        cost: Yup.number()
+            .typeError('Must be a Number')
             .positive('Must be positive')
             .required('Required'),
         progress: Yup.string()
@@ -345,7 +350,7 @@ class RepairsComponent extends Component {
         return(
             <div>
                 <Formik
-                initialValues = {{carId: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
+                initialValues = {{car: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
                 validationSchema={this.RepairValidationSchema}
                 onSubmit = {(values) => {
                     this.handleCorrectSumbit(values)
