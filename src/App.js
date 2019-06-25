@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import CarsComponent from './CarsComponent'
+import RepairsComponent from './RepairsComponent'
 
 function Index() {
   return <h2>Home</h2>;
@@ -18,7 +19,12 @@ function Cars() {
 }
 
 function Repairs() {
-  return <h2>Repairs</h2>;
+  return (
+    <div>
+      <h2>Repairs</h2>
+      <RepairsComponent />
+    </div>
+  );
 }
 
 function AppRouter() {

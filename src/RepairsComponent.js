@@ -11,7 +11,7 @@ class RepairsComponent extends Component {
         repairs: null,
         shouldGetPostData: false,
         shouldGetPutData: false,
-        carIdUpdate: null
+        repairIdUpdate: null
       }
     }
     
@@ -21,7 +21,7 @@ class RepairsComponent extends Component {
             .catch(err => console.log(err));
 
         this.getRepairsData()
-            .then(res => this.setState({ cars: res.cars }))
+            .then(res => this.setState({ repairs: res.repairs }))
             .catch(err => console.log(err));   
     }
   
@@ -30,9 +30,9 @@ class RepairsComponent extends Component {
     getCarsData = async() => {
       const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
       const body = await response.json();
-  
+
       if (response.status !== 200) {
-        throw Error(body) 
+        throw Error(body);
       }
       return body;
     };
@@ -45,16 +45,16 @@ class RepairsComponent extends Component {
           throw Error(body) 
         }
         return body;
-      };
-  
-    callDeleteData(carId) {
-      this.deleteData(carId)
-        .then(res => this.setState({cars: res.cars}))
-        .catch(err => console.log(err));
+    };
+
+    callDeleteData(repairId) {
+        this.deleteData(repairId)
+            .then(res => this.setState({repairs: res.repairs}))
+            .catch(err => console.log(err));
     }
   
-    deleteData = async(carId) => {
-      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
+    deleteData = async(repairId) => {
+      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
         method: 'DELETE'
       });
       const body = await response.json();
@@ -65,102 +65,110 @@ class RepairsComponent extends Component {
       return body;
     }
   
-    getPutData(car, setValues) {
-      this.setState({
-        shouldGetPutData: true,
-        carIdUpdate: car._id
-      });
-      setValues({
-        make: car.make,
-        model: car.model,
-        year: car.year,
-        rating: car.rating
-      });
+    getPutData(repair, setValues) {
+        this.setState({
+            shouldGetPutData: true,
+            repairIdUpdate: repair._id
+        });
+        setValues({
+            carId: repair.carId,
+            description: repair.description,
+            estTime: repair.estTime,
+            cost: repair.cost,
+            progress: repair.progress,
+            technician: repair.technician
+        });
     }
   
-    callPutData(carId, values) {
-      this.putData(carId, values)
-      .then(res => this.setState({ 
-          cars: res.cars,
-          shouldGetPostData: false,
-          shouldGetPutData: false,
-          carIdUpdate: null
-        }))
-      .catch(err => console.log(err));
+    callPutData(repairId, values) {
+        this.putData(repairId, values)
+            .then(res => this.setState({ 
+                repairs: res.repairs,
+                shouldGetPostData: false,
+                shouldGetPutData: false,
+                repairIdUpdate: null
+            }))
+            .catch(err => alert(err));
     }
   
-    putData = async(carId, values) => {
-      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          make: values.make,
-          model: values.model,
-          year: values.year,
-          rating: values.rating
-        })
-      });
-      const body = await response.json();
+    putData = async(repairId, values) => {
+        const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
+            method: 'PUT',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                carId: values.carId,
+                description: values.description,
+                estTime: values.estTime,
+                cost: values.cost,
+                progress: values.progress,
+                technician: values.technician
+            })
+        });
+        const body = await response.json();
   
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
+        if (response.status !== 200) {
+            throw Error(body) 
+        }
+        return body;
     }
   
     getPostData(setValues) {
       this.setState({shouldGetPostData: true});
       setValues({
-        make: "",
-        model: "",
-        year: "",
-        rating: ""
+        carId: "",
+        description: "",
+        estTime: "",
+        cost: "",
+        progress: "",
+        technician: ""
       })
     }
   
     callPostData(values) {
       this.postData(values)
         .then(res => this.setState({ 
-            cars: res.cars,
+            repairs: res.repairs,
             shouldGetPostData: false,
             shouldGetPutData: false,
-            carIdUpdate: null,
+            repairIdUpdate: null,
           }))
         .catch(err => console.log(err));
     }
   
     postData = async(values) => {
-      const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
+        const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/repairs', {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          make: values.make,
-          model: values.model,
-          year: values.year,
-          rating: values.rating
+            carId: values.carId,
+            description: values.description,
+            estTime: values.estTime,
+            cost: values.cost,
+            progress: values.progress,
+            technician: values.technician
         })
-      });
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
+        });
+        const body = await response.json();
+
+        if (response.status !== 200) {
+            throw Error(body) 
+        }
+        return body;
     }
   
     tableStyles() {
-      return ({
-        "width": "80%",
-        "border-collapse": "collapse",
-        "border": "1px solid #dddddd",
-        "margin": "1em auto"
-      });
+        return ({
+            "width": "80%",
+            "border-collapse": "collapse",
+            "border": "1px solid #dddddd",
+            "margin": "1em auto"
+        });
     };
   
     rowColStyles() {
@@ -170,50 +178,66 @@ class RepairsComponent extends Component {
       });
     };
     
-    updateRowForm = (values) => {
+    updateRepairForm = (values) => {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-              <Field type="text" name="make" />
-              <ErrorMessage name="make" />
+              <Field type="text" name="carId" />
+              <ErrorMessage name="carId" />
             </td>
             <td>
-              <Field type="text" name="model" />
-              <ErrorMessage name="model" />
+              <Field type="text" name="description" />
+              <ErrorMessage name="description" />
             </td>
             <td>
-              <Field type="text" name="year" />
-              <ErrorMessage name="year" />
+              <Field type="text" name="estTime" />
+              <ErrorMessage name="estTime" />
             </td>
             <td>
-              <Field type="text" name="rating" />
-              <ErrorMessage name="rating" />
+              <Field type="text" name="cost" />
+              <ErrorMessage name="cost" />
             </td>
             <td>
-              <button type="button" onClick={() => this.callPutData(this.state.carIdUpdate, values)}>UPDATE</button>
+              <Field type="text" name="progress" />
+              <ErrorMessage name="progress" />
+            </td>
+            <td>
+              <Field type="text" name="technician" />
+              <ErrorMessage name="technician" />
+            </td>
+            <td>
+              <button type="button" onClick={() => this.callPutData(this.state.repairIdUpdate, values)}>UPDATE</button>
             </td>
         </tr>
       )
     }
   
-    newCarForm = () => {
+    newRepairForm = () => {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-              <Field type="text" name="make" placeHolder="Make" />
-              <ErrorMessage name="make" />
+              <Field type="text" name="carId" placeHolder="Car Id" />
+              <ErrorMessage name="carId" />
             </td>
             <td>
-              <Field type="text" name="model" placeHolder="Model" />
-              <ErrorMessage name="model" />
+              <Field type="text" name="description" placeHolder="Description" />
+              <ErrorMessage name="description" />
             </td>
             <td>
-              <Field type="text" name="year" placeHolder="Year" />
-              <ErrorMessage name="year" />
+              <Field type="text" name="estTime" placeHolder="Estimated Time" />
+              <ErrorMessage name="estTime" />
             </td>
             <td>
-              <Field type="text" name="rating" placeHolder="Rating" />
-              <ErrorMessage name="rating" />
+              <Field type="text" name="cost" placeHolder="Cost" />
+              <ErrorMessage name="cost" />
+            </td>
+            <td>
+              <Field type="text" name="progress" placeHolder="Progress" />
+              <ErrorMessage name="progress" />
+            </td>
+            <td>
+              <Field type="text" name="technician" placeHolder="Technician" />
+              <ErrorMessage name="technician" />
             </td>
             <td>
               <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>cancel</button>
@@ -222,75 +246,78 @@ class RepairsComponent extends Component {
         </tr>
     )}
   
-    getCarsDisplay = (setValues, values) => {
-      var carsDisplay;
-      if (this.state.cars == null) {
-        carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
-      } else {
-        carsDisplay = this.state.cars.map((car) => { 
-          if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
-            return (this.updateRowForm(values));
-          } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
-            return (
-            <tr style={this.rowColStyles()}>
-              <td>{car.make}</td>
-              <td>{car.model}</td>
-              <td>{car.year}</td>
-              <td> {car.rating} </td>
-              <td></td>
-            </tr>)
-          } else {
-            return (
-              <tr style={this.rowColStyles()}>
-                <td>{car.make}</td>
-                <td>{car.model}</td>
-                <td>{car.year}</td>
-                <td> {car.rating} </td>
-                <td>
-                  <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
-                  <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id)}>DELETE</button> 
-                </td>
-              </tr>)
+    getRepairsDisplay = (setValues, values) => {
+        var repairsDisplay;
+        if (this.state.repairs == null) {
+            repairsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
+        } else {
+            repairsDisplay = this.state.repairs.map((repair) => { 
+            if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
+                return (this.updateRepairForm(values));
+            } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
+                return (
+                <tr style={this.rowColStyles()}>
+                <td>{repair.carId}</td>
+                <td>{repair.description}</td>
+                <td>{repair.estTime}</td>
+                <td>{repair.cost}</td>
+                <td>{repair.progress}</td>
+                <td>{repair.technician}</td>
+                <td></td>
+                </tr>)
+            } else {
+                return (
+                <tr style={this.rowColStyles()}>
+                    <td>{repair.carId}</td>
+                    <td>{repair.description}</td>
+                    <td>{repair.estTime}</td>
+                    <td>{repair.cost}</td>
+                    <td>{repair.progress}</td>
+                    <td>{repair.technician}</td>
+                    <td>
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
+                    </td>
+                </tr>)
           }
         });
         if (this.state.shouldGetPostData) {
-          carsDisplay.push([this.newCarForm()]);
+            repairsDisplay.push([this.newRepairForm()]);
         }
       }
-      return carsDisplay;
+      return repairsDisplay;
     }
   
     handleCorrectSumbit = (values) => {
       if (this.state.shouldGetPostData) {
         this.callPostData(values);
       } else {
-        this.callPutData(this.state.carIdUpdate, values);
+        this.callPutData(this.state.repairIdUpdate, values);
       }
     }
   
-    CarValidationSchema = Yup.object().shape({
-      make: Yup.string()
-        .required('Required'),
-      model: Yup.string()
-        .required('Required'),
-      year: Yup.number('Must be a number')
-        .integer('Must be an Integer')
-        .min(1885, "Too Old!")
-        .required('Required'),
-      rating: Yup.number('Must be a number')
-        .positive('Must be positive')
-        .integer('Must be an Integer')
-        .min(0, 'Rating must be 0-10')
-        .max(10, 'Rating must be 0-10')
-        .required('Required')
+    RepairValidationSchema = Yup.object().shape({
+        carId: Yup.string()
+            .required('Required'),
+        description: Yup.string()
+            .required('Required'),
+        estTime: Yup.number('Must be a number')
+            .required('Required'),
+        cost: Yup.number('Must be a number')
+            .positive('Must be positive')
+            .required('Required'),
+        progress: Yup.string()
+            .required('Required'),
+        technician: Yup.string()
+            .required('Required')
     })
   
     render() {
   
         return(
             <Formik
-            initialValues = {{make: '', model: '', year: '', rating: ''}}
-            validationSchema={this.CarValidationSchema}
+            initialValues = {{carId: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
+            validationSchema={this.RepairValidationSchema}
             onSubmit = {(values) => {
                 this.handleCorrectSumbit(values)
             }}
@@ -299,15 +326,17 @@ class RepairsComponent extends Component {
             <Form>
                 <table style={this.tableStyles()}>
                 <tr style={this.rowColStyles()}>
-                    <th>Make</th>
-                    <th>Model</th>
-                    <th>Year</th>
-                    <th>Rating</th>
-                    <th>Action</th>
+                    <th>Car Id</th>
+                    <th>Decription</th>
+                    <th>Estimated Time</th>
+                    <th>Cost</th>
+                    <th>Progress</th>
+                    <th>Technician</th>
+                    <th>Actions</th>
                 </tr>
-                {this.getCarsDisplay(setValues, values)}
+                {this.getRepairsDisplay(setValues, values)}
                 </table>
-                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>
+                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW REPAIR</button>
             </Form>
             )}
             </Formik>
