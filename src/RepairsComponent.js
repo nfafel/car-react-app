@@ -172,41 +172,59 @@ class RepairsComponent extends Component {
     };
   
     rowColStyles() {
-      return ({
-        "border-collapse": "collapse",
-        "border": "1px solid #dddddd"
-      });
+        return ({
+            "border-collapse": "collapse",
+            "border": "1px solid #dddddd"
+        });
     };
+
+    carOptions = () => {
+        var carOptions;
+        if (this.state.cars == null) {
+            carOptions = (<p>Loading...</p>);
+        } else {
+            carOptions = this.state.cars.map((car) => {
+                return (
+                    <option value={car._id}>
+                        {car.year} {car.make} {car.model}
+                    </option>
+                )
+            })
+        }
+        return carOptions;
+    }
     
     updateRepairForm = (values) => {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-              <Field type="text" name="carId" />
-              <ErrorMessage name="carId" />
+                <Field name="carId" component="select" placeHolder="car">
+                    {this.carOptions()}
+                </Field>
+                <ErrorMessage name="carId" />
             </td>
             <td>
-              <Field type="text" name="description" />
-              <ErrorMessage name="description" />
+                <Field type="text" name="description" />
+                <ErrorMessage name="description" />
             </td>
             <td>
-              <Field type="text" name="estTime" />
-              <ErrorMessage name="estTime" />
+                <Field type="text" name="estTime" />
+                <ErrorMessage name="estTime" />
             </td>
             <td>
-              <Field type="text" name="cost" />
-              <ErrorMessage name="cost" />
+                <Field type="text" name="cost" />
+                <ErrorMessage name="cost" />
             </td>
             <td>
-              <Field type="text" name="progress" />
-              <ErrorMessage name="progress" />
+                <Field type="text" name="progress" />
+                <ErrorMessage name="progress" />
             </td>
             <td>
-              <Field type="text" name="technician" />
-              <ErrorMessage name="technician" />
+                <Field type="text" name="technician" />
+                <ErrorMessage name="technician" />
             </td>
             <td>
-              <button type="button" onClick={() => this.callPutData(this.state.repairIdUpdate, values)}>UPDATE</button>
+                <button type="button" onClick={() => this.callPutData(this.state.repairIdUpdate, values)}>UPDATE</button>
             </td>
         </tr>
       )
@@ -216,35 +234,43 @@ class RepairsComponent extends Component {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-              <Field type="text" name="carId" placeHolder="Car Id" />
-              <ErrorMessage name="carId" />
+                <Field name="carId" component="select" placeHolder="car">
+                    {this.carOptions()}
+                </Field>
+                <ErrorMessage name="carId" />
             </td>
             <td>
-              <Field type="text" name="description" placeHolder="Description" />
-              <ErrorMessage name="description" />
+                <Field type="text" name="description" placeHolder="Description" />
+                <ErrorMessage name="description" />
             </td>
             <td>
-              <Field type="text" name="estTime" placeHolder="Estimated Time" />
-              <ErrorMessage name="estTime" />
+                <Field type="text" name="estTime" placeHolder="Estimated Time" />
+                <ErrorMessage name="estTime" />
             </td>
             <td>
-              <Field type="text" name="cost" placeHolder="Cost" />
-              <ErrorMessage name="cost" />
+                <Field type="text" name="cost" placeHolder="Cost" />
+                <ErrorMessage name="cost" />
             </td>
             <td>
-              <Field type="text" name="progress" placeHolder="Progress" />
-              <ErrorMessage name="progress" />
+                <Field type="text" name="progress" placeHolder="Progress" />
+                <ErrorMessage name="progress" />
             </td>
             <td>
-              <Field type="text" name="technician" placeHolder="Technician" />
-              <ErrorMessage name="technician" />
+                <Field type="text" name="technician" placeHolder="Technician" />
+                <ErrorMessage name="technician" />
             </td>
             <td>
-              <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>cancel</button>
-              <button type="submit">SUMBIT</button>
+                <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>cancel</button>
+                <button type="submit">SUMBIT</button>
             </td>
         </tr>
     )}
+
+    getRepairedCar = async(carId) => {
+        const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`);
+        const body = await response.json();
+        return body;
+    }
   
     getRepairsDisplay = (setValues, values) => {
         var repairsDisplay;
@@ -255,9 +281,10 @@ class RepairsComponent extends Component {
             if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
                 return (this.updateRepairForm(values));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
+                var repairedCar = this.getRepairedCar(repair.carId);
                 return (
                 <tr style={this.rowColStyles()}>
-                <td>{repair.carId}</td>
+                <td>{repairedCar} </td>
                 <td>{repair.description}</td>
                 <td>{repair.estTime}</td>
                 <td>{repair.cost}</td>
@@ -266,9 +293,10 @@ class RepairsComponent extends Component {
                 <td></td>
                 </tr>)
             } else {
+                var repairedCar = this.getRepairedCar(repair.carId);
                 return (
                 <tr style={this.rowColStyles()}>
-                    <td>{repair.carId}</td>
+                    <td>{repairedCar}</td>
                     <td>{repair.description}</td>
                     <td>{repair.estTime}</td>
                     <td>{repair.cost}</td>
@@ -315,32 +343,34 @@ class RepairsComponent extends Component {
     render() {
   
         return(
-            <Formik
-            initialValues = {{carId: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
-            validationSchema={this.RepairValidationSchema}
-            onSubmit = {(values) => {
-                this.handleCorrectSumbit(values)
-            }}
-            >
-            {({setValues, values}) => (
-            <Form>
-                <table style={this.tableStyles()}>
-                <tr style={this.rowColStyles()}>
-                    <th>Car Id</th>
-                    <th>Decription</th>
-                    <th>Estimated Time</th>
-                    <th>Cost</th>
-                    <th>Progress</th>
-                    <th>Technician</th>
-                    <th>Actions</th>
-                </tr>
-                {this.getRepairsDisplay(setValues, values)}
-                </table>
-                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW REPAIR</button>
-            </Form>
-            )}
-            </Formik>
-      );
+            <div>
+                <Formik
+                initialValues = {{carId: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
+                validationSchema={this.RepairValidationSchema}
+                onSubmit = {(values) => {
+                    this.handleCorrectSumbit(values)
+                }}
+                >
+                {({setValues, values}) => (
+                <Form>
+                    <table style={this.tableStyles()}>
+                    <tr style={this.rowColStyles()}>
+                        <th>Car</th>
+                        <th>Decription</th>
+                        <th>Estimated Time</th>
+                        <th>Cost</th>
+                        <th>Progress</th>
+                        <th>Technician</th>
+                        <th>Actions</th>
+                    </tr>
+                    {this.getRepairsDisplay(setValues, values)}
+                    </table>
+                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW REPAIR</button>
+                </Form>
+                )}
+                </Formik>
+            </div>
+        );
     }
   }
   
