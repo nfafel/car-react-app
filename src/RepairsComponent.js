@@ -71,7 +71,7 @@ class RepairsComponent extends Component {
         setValues({
             car: JSON.stringify(repair.car),
             description: repair.description,
-            estTime: repair.estTime,
+            date: repair.date,
             cost: repair.cost,
             progress: repair.progress,
             technician: repair.technician
@@ -99,7 +99,7 @@ class RepairsComponent extends Component {
             body: JSON.stringify({
                 car: JSON.parse(values.car),
                 description: values.description,
-                estTime: values.estTime,
+                date: values.date,
                 cost: values.cost,
                 progress: values.progress,
                 technician: values.technician
@@ -118,7 +118,7 @@ class RepairsComponent extends Component {
       setValues({
         car: "",
         description: "",
-        estTime: "",
+        date: "",
         cost: "",
         progress: "",
         technician: ""
@@ -146,7 +146,7 @@ class RepairsComponent extends Component {
         body: JSON.stringify({
             car: JSON.parse(values.car),
             description: values.description,
-            estTime: values.estTime,
+            date: values.date,
             cost: values.cost,
             progress: values.progress,
             technician: values.technician
@@ -181,26 +181,29 @@ class RepairsComponent extends Component {
         if (this.state.cars == null) {
             carOptions = (<p>Loading...</p>);
         } else {
-            carOptions = this.state.cars.map((car) => {
-                if (!(this.state.shouldGetPutData && (JSON.stringify(car) === values.car))) {
-                    return (
-                        <option value={JSON.stringify(car)} >
-                            {car.year} {car.make} {car.model}
-                        </option>
-                    )
+            carOptions = this.state.cars.filter((car) => {
+                if (this.state.shouldGetPutData && (JSON.stringify(car) === values.car)) {
+                    return false;
+                } else {
+                    return true;
                 }
+            }).map((car) => {
+                return (
+                    <option value={JSON.stringify(car)} >
+                        {car.year} {car.make} {car.model}
+                    </option>
+                )
             })
         }
        
         if (this.state.shouldGetPutData) {
-            alert(values.car);
             var chosenCar = JSON.parse(values.car);
             var chosenCarMake = chosenCar.make;
             var chosenCarModel = chosenCar.model;
             var chosenCarYear = chosenCar.year;
             carOptions.splice(0,0, <option value={values.car}>{chosenCarYear} {chosenCarMake} {chosenCarModel}</option>);
         } else {
-            carOptions.splice(0,0, <option>Select a Car</option>);
+            carOptions.splice(0,0, <option value=''>Select a Car</option>);
         }
         return carOptions;
     }
@@ -215,19 +218,23 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="car" />
             </td>
             <td>
-                <Field type="text" name="description" />
-                <ErrorMessage name="description" />
+                <Field type="date" name="date" value={values.date.split('T', 1)}/>
+                <ErrorMessage name="date" />
             </td>
             <td>
-                <Field type="text" name="estTime" />
-                <ErrorMessage name="estTime" />
+                <Field type="text" name="description" />
+                <ErrorMessage name="description" />
             </td>
             <td>
                 <Field type="text" name="cost" />
                 <ErrorMessage name="cost" />
             </td>
             <td>
-                <Field type="text" name="progress" />
+                <Field name="progress" component="select" value={values.progress}>
+                    <option value="Ready">Ready</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </Field>
                 <ErrorMessage name="progress" />
             </td>
             <td>
@@ -251,19 +258,24 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="car" />
             </td>
             <td>
-                <Field type="text" name="description" placeHolder="Description" />
-                <ErrorMessage name="description" />
+                <Field type="date" name="date" placeHolder="Date" />
+                <ErrorMessage name="date" />
             </td>
             <td>
-                <Field type="text" name="estTime" placeHolder="Estimated Time" />
-                <ErrorMessage name="estTime" />
+                <Field type="text" name="description" placeHolder="Description" />
+                <ErrorMessage name="description" />
             </td>
             <td>
                 <Field type="text" name="cost" placeHolder="Cost" />
                 <ErrorMessage name="cost" />
             </td>
             <td>
-                <Field type="text" name="progress" placeHolder="Progress" />
+                <Field name="progress" placeHolder="Progress" component="select" >
+                    <option value="">Select Progress</option>
+                    <option value="ready">Ready</option>
+                    <option value="inProgress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </Field>
                 <ErrorMessage name="progress" />
             </td>
             <td>
@@ -289,9 +301,9 @@ class RepairsComponent extends Component {
                 return (
                 <tr style={this.rowColStyles()}>
                 <td>{repair.car.year} {repair.car.make} {repair.car.model}</td>
+                <td>{repair.date.split('T', 1)}</td>
                 <td>{repair.description}</td>
-                <td>{repair.estTime}</td>
-                <td>{repair.cost}</td>
+                <td>${repair.cost}</td>
                 <td>{repair.progress}</td>
                 <td>{repair.technician}</td>
                 <td></td>
@@ -300,9 +312,9 @@ class RepairsComponent extends Component {
                 return (
                 <tr style={this.rowColStyles()}>
                     <td>{repair.car.year} {repair.car.make} {repair.car.model}</td>
+                    <td>{repair.date.split('T', 1)}</td>
                     <td>{repair.description}</td>
-                    <td>{repair.estTime}</td>
-                    <td>{repair.cost}</td>
+                    <td>${repair.cost}</td>
                     <td>{repair.progress}</td>
                     <td>{repair.technician}</td>
                     <td>
@@ -332,8 +344,8 @@ class RepairsComponent extends Component {
             .required('Required'),
         description: Yup.string()
             .required('Required'),
-        estTime: Yup.number()
-            .typeError('Must be a Number')
+        date: Yup.date()
+            .typeError('Must be a Date')
             .required('Required'),
         cost: Yup.number()
             .typeError('Must be a Number')
@@ -350,7 +362,7 @@ class RepairsComponent extends Component {
         return(
             <div>
                 <Formik
-                initialValues = {{car: '', description: '', estTime: '', cost: '', progress: '', technician: ''}}
+                initialValues = {{car: '', description: '', date: '', cost: '', progress: '', technician: ''}}
                 validationSchema={this.RepairValidationSchema}
                 onSubmit = {(values) => {
                     this.handleCorrectSumbit(values)
@@ -361,8 +373,8 @@ class RepairsComponent extends Component {
                     <table style={this.tableStyles()}>
                     <tr style={this.rowColStyles()}>
                         <th>Car</th>
+                        <th>Date Admitted</th>
                         <th>Decription</th>
-                        <th>Estimated Time</th>
                         <th>Cost</th>
                         <th>Progress</th>
                         <th>Technician</th>

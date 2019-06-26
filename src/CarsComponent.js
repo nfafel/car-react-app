@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup'
+import RepairsByCarComponent from './RepairsByCarComponent'
 
 class CarsComponent extends Component {
     constructor(props){
@@ -246,11 +247,11 @@ class CarsComponent extends Component {
     }
   
     handleCorrectSumbit = (values) => {
-      if (this.state.shouldGetPostData) {
-        this.callPostData(values);
-      } else {
-        this.callPutData(this.state.carIdUpdate, values);
-      }
+        if (this.state.shouldGetPostData) {
+            this.callPostData(values);
+        } else {
+            this.callPutData(this.state.carIdUpdate, values);
+        }
     }
   
     CarValidationSchema = Yup.object().shape({
@@ -271,31 +272,43 @@ class CarsComponent extends Component {
     })
   
     render() {
+
+        var testCar = {
+            "_id": "5d124e553d5143000f45894c",
+            "make": "Kia",
+            "model": "Forte",
+            "year": "2018",
+            "rating": "7",
+            "__v": 0
+        }
   
         return(
-            <Formik
-            initialValues = {{make: '', model: '', year: '', rating: ''}}
-            validationSchema={this.CarValidationSchema}
-            onSubmit = {(values) => {
-                this.handleCorrectSumbit(values)
-            }}
-            >
-            {({setValues, values}) => (
-            <Form>
-                <table style={this.tableStyles()}>
-                <tr style={this.rowColStyles()}>
-                    <th>Make</th>
-                    <th>Model</th>
-                    <th>Year</th>
-                    <th>Rating</th>
-                    <th>Action</th>
-                </tr>
-                {this.getCarsDisplay(setValues, values)}
-                </table>
-                <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>
-            </Form>
-            )}
-            </Formik>
+            <div>
+                <Formik
+                initialValues = {{make: '', model: '', year: '', rating: ''}}
+                validationSchema={this.CarValidationSchema}
+                onSubmit = {(values) => {
+                    this.handleCorrectSumbit(values)
+                }}
+                >
+                {({setValues, values}) => (
+                <Form>
+                    <table style={this.tableStyles()}>
+                    <tr style={this.rowColStyles()}>
+                        <th>Make</th>
+                        <th>Model</th>
+                        <th>Year</th>
+                        <th>Rating</th>
+                        <th>Action</th>
+                    </tr>
+                    {this.getCarsDisplay(setValues, values)}
+                    </table>
+                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>
+                </Form>
+                )}
+                </Formik>
+                <RepairsByCarComponent carId={testCar._id}/>
+            </div>
       );
     }
   }
