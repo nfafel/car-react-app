@@ -4,6 +4,8 @@ import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup'
 import RepairsByCarComponent from './RepairsByCarComponent'
 
+const queryFunctions = require('./queryFuncForCarsComponent')
+
 class CarsComponent extends Component {
     constructor(props){
       super(props);
@@ -11,44 +13,23 @@ class CarsComponent extends Component {
         cars: null,
         shouldGetPostData: false,
         shouldGetPutData: false,
-        carIdUpdate: null
+        carIdUpdate: null,
+        repairsForCar: null
       }
     }
     
     componentDidMount() {
-      this.getCarsData()
+      queryFunctions.getCarsData()
         .then(res => this.setState({ cars: res.cars }))
         .catch(err => console.log(err));
     }
   
     // Fetches our GET route from the Express server. (Note the route we are fetching matches the GET route from server.js
   
-    getCarsData = async() => {
-      const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
-    };
-  
     callDeleteData(carId) {
-      this.deleteData(carId)
-        .then(res => this.setState({cars: res.cars}))
-        .catch(err => console.log(err));
-    }
-  
-    deleteData = async(carId) => {
-      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-        method: 'DELETE'
-      });
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
+        queryFunctions.deleteData(carId)
+            .then(res => this.setState({cars: res.cars}))
+            .catch(err => console.log(err));
     }
   
     getPutData(car, setValues) {
@@ -65,100 +46,61 @@ class CarsComponent extends Component {
     }
   
     callPutData(carId, values) {
-      this.putData(carId, values)
-      .then(res => this.setState({ 
-          cars: res.cars,
-          shouldGetPostData: false,
-          shouldGetPutData: false,
-          carIdUpdate: null
-        }))
-      .catch(err => console.log(err));
+        queryFunctions.putData(carId, values)
+            .then(res => this.setState({ 
+                cars: res.cars,
+                shouldGetPostData: false,
+                shouldGetPutData: false,
+                carIdUpdate: null
+                }))
+            .catch(err => console.log(err));
     }
   
-    putData = async(carId, values) => {
-      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          make: values.make,
-          model: values.model,
-          year: values.year,
-          rating: values.rating
-        })
-      });
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
-    }
   
     getPostData(setValues) {
-      this.setState({shouldGetPostData: true});
-      setValues({
-        make: "",
-        model: "",
-        year: "",
-        rating: ""
-      })
+        this.setState({shouldGetPostData: true});
+        setValues({
+            make: "",
+            model: "",
+            year: "",
+            rating: ""
+        })
     }
   
     callPostData(values) {
-      this.postData(values)
-        .then(res => this.setState({ 
-            cars: res.cars,
-            shouldGetPostData: false,
-            shouldGetPutData: false,
-            carIdUpdate: null,
-          }))
-        .catch(err => console.log(err));
+        queryFunctions.postData(values)
+            .then(res => this.setState({ 
+                cars: res.cars,
+                shouldGetPostData: false,
+                shouldGetPutData: false,
+                carIdUpdate: null,
+            }))
+            .catch(err => console.log(err));
+    }
+
+    setRepairsForCar = (repairsForCarId) => {
+        queryFunctions.getRepairsForCar(repairsForCarId)
+            .then(res => this.setState({ repairsForCar: res.repairsForCar }))
+            .catch(err => console.log(err));
     }
   
-    postData = async(values) => {
-      const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          make: values.make,
-          model: values.model,
-          year: values.year,
-          rating: values.rating
-        })
-      });
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
-    }
-  
-    tableStyles() {
-      return ({
+    tableStyles = {
         "width": "80%",
         "border-collapse": "collapse",
         "border": "1px solid #dddddd",
         "margin": "1em auto"
-      });
+     
     };
-  
-    rowColStyles() {
-      return ({
+
+    rowColStyles = {
         "border-collapse": "collapse",
         "border": "1px solid #dddddd"
-      });
+     
     };
     
     updateRowForm = (values) => {
       return (
-        <tr style={this.rowColStyles()}>
+        <tr style={this.rowColStyles}>
             <td>
               <Field type="text" name="make" />
               <ErrorMessage name="make" />
@@ -184,7 +126,7 @@ class CarsComponent extends Component {
   
     newCarForm = () => {
       return (
-        <tr style={this.rowColStyles()}>
+        <tr style={this.rowColStyles}>
             <td>
               <Field type="text" name="make" placeHolder="Make" />
               <ErrorMessage name="make" />
@@ -211,14 +153,14 @@ class CarsComponent extends Component {
     getCarsDisplay = (setValues, values) => {
       var carsDisplay;
       if (this.state.cars == null) {
-        carsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
+        carsDisplay = <tr style={this.rowColStyles}>"Loading ..."</tr>;
       } else {
         carsDisplay = this.state.cars.map((car) => { 
           if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
             return (this.updateRowForm(values));
           } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
             return (
-            <tr style={this.rowColStyles()}>
+            <tr style={this.rowColStyles}>
               <td>{car.make}</td>
               <td>{car.model}</td>
               <td>{car.year}</td>
@@ -227,7 +169,7 @@ class CarsComponent extends Component {
             </tr>)
           } else {
             return (
-              <tr style={this.rowColStyles()}>
+              <tr style={this.rowColStyles} onClick={() => {this.setRepairsForCar(car._id)}}>
                 <td>{car.make}</td>
                 <td>{car.model}</td>
                 <td>{car.year}</td>
@@ -270,18 +212,17 @@ class CarsComponent extends Component {
         .max(10, 'Rating must be 0-10')
         .required('Required')
     })
+
+    showRepairsForCar = () => {
+        if (this.state.repairsForCar != null) {
+            return (<RepairsByCarComponent repairsForCar={this.state.repairsForCar} rowColStyles={this.rowColStyles} tableStyles={this.tableStyles} />);
+        } else {
+            return (<br></br>)
+        }
+    }
   
     render() {
 
-        var testCar = {
-            "_id": "5d124e553d5143000f45894c",
-            "make": "Kia",
-            "model": "Forte",
-            "year": "2018",
-            "rating": "7",
-            "__v": 0
-        }
-  
         return(
             <div>
                 <Formik
@@ -293,8 +234,8 @@ class CarsComponent extends Component {
                 >
                 {({setValues, values}) => (
                 <Form>
-                    <table style={this.tableStyles()}>
-                    <tr style={this.rowColStyles()}>
+                    <table style={this.tableStyles}>
+                    <tr style={this.rowColStyles}>
                         <th>Make</th>
                         <th>Model</th>
                         <th>Year</th>
@@ -307,7 +248,7 @@ class CarsComponent extends Component {
                 </Form>
                 )}
                 </Formik>
-                <RepairsByCarComponent carId={testCar._id}/>
+                {this.showRepairsForCar()}
             </div>
       );
     }
