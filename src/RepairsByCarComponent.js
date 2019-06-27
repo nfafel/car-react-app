@@ -10,7 +10,7 @@ class RepairsByCarComponent extends Component {
                 <tr style={this.props.rowColStyles}>
                     <td>{repair.date.split('T', 1)}</td>
                     <td>{repair.description}</td>
-                    <td>{repair.cost}</td>
+                    <td>${repair.cost}</td>
                     <td>{repair.progress}</td>
                     <td>{repair.technician}</td>
                 </tr>
@@ -21,7 +21,7 @@ class RepairsByCarComponent extends Component {
 
     render() {
         if (this.props.repairsForCar[0] === undefined) {
-            return (<h3>No Repairs Recorded for This Car</h3>);
+            return (<h3>No Repairs Recorded for the {this.props.repairCarYear} {this.props.repairCarMake} {this.props.repairCarModel}</h3>);
         }
         return(
             <div>

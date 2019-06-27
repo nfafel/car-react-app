@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import CarsComponent from './CarsComponent'
@@ -89,10 +88,9 @@ class App extends Component {
 
     return(
       <div className="App">
-        <header className="App-header" style={{"height":"50%"}}>
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-          <p>{versionText}</p>
+        <header className="App-header">
+          <h1 className="App-title" style={{"margin":"0em"}}>Car Repair Editor</h1>
+          <p style={{"margin":"0em"}}>{versionText}</p>
         </header>
         <AppRouter />
       </div>
