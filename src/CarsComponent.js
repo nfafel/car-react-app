@@ -58,9 +58,9 @@ class CarsComponent extends Component {
     }
   
   
-    getPostData(setValues) {
+    getPostData(resetForm) {
         this.setState({shouldGetPostData: true});
-        setValues({
+        resetForm({
             make: "",
             model: "",
             year: "",
@@ -124,16 +124,16 @@ class CarsComponent extends Component {
         return (
             <tr style={this.rowColStyles}>
                 <td>
+                    <Field type="text" name="year" placeHolder="Year" />
+                    <ErrorMessage name="year" />
+                </td>
+                <td>
                     <Field type="text" name="make" placeHolder="Make" />
                     <ErrorMessage name="make" />
                 </td>
                 <td>
                     <Field type="text" name="model" placeHolder="Model" />
                     <ErrorMessage name="model" />
-                </td>
-                <td>
-                    <Field type="text" name="year" placeHolder="Year" />
-                    <ErrorMessage name="year" />
                 </td>
                 <td>
                     <Field type="text" name="rating" placeHolder="Rating" />
@@ -156,18 +156,18 @@ class CarsComponent extends Component {
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
                 <tr style={this.rowColStyles}>
+                <td>{car.year}</td>
                 <td>{car.make}</td>
                 <td>{car.model}</td>
-                <td>{car.year}</td>
                 <td> {car.rating} </td>
                 <td></td>
                 </tr>)
             } else {
                 return (
                 <tr style={this.rowColStyles} >
+                    <td>{car.year}</td>
                     <td>{car.make}</td>
                     <td>{car.model}</td>
-                    <td>{car.year}</td>
                     <td> {car.rating} </td>
                     <td>
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
@@ -197,12 +197,13 @@ class CarsComponent extends Component {
         .required('Required'),
       model: Yup.string()
         .required('Required'),
-      year: Yup.number('Must be a number')
+      year: Yup.number()
         .integer('Must be an Integer')
         .min(1885, "Too Old!")
+        .typeError('Must Be a Number')
         .required('Required'),
-      rating: Yup.number('Must be a number')
-        .positive('Must be positive')
+      rating: Yup.number()
+        .typeError('Must be a Number')
         .integer('Must be an Integer')
         .min(0, 'Rating must be 0-10')
         .max(10, 'Rating must be 0-10')
@@ -228,19 +229,19 @@ class CarsComponent extends Component {
                     this.handleCorrectSumbit(values)
                 }}
                 >
-                {({setValues, values}) => (
+                {({setValues, values, resetForm}) => (
                 <Form>
                     <table style={this.tableStyles}>
                     <tr style={this.rowColStyles}>
+                        <th>Year</th>
                         <th>Make</th>
                         <th>Model</th>
-                        <th>Year</th>
                         <th>Rating</th>
                         <th>Actions</th>
                     </tr>
                     {this.getCarsDisplay(setValues, values)}
                     </table>
-                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW CAR</button>                </Form>
+                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>                </Form>
                 )}
                 </Formik>
                 {this.showRepairsForCar()}
