@@ -3,6 +3,8 @@ import './App.css';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup'
 
+const queryFunctions = require('./queryFuncForRepairsComponent');
+
 class RepairsComponent extends Component {
     constructor(props){
       super(props);
@@ -16,51 +18,19 @@ class RepairsComponent extends Component {
     }
     
     componentDidMount() {
-        this.getCarsData()
+        queryFunctions.getCarsData()
             .then(res => this.setState({ cars: res.cars }))
             .catch(err => console.log(err));
 
-        this.getRepairsData()
+        queryFunctions.getRepairsData()
             .then(res => this.setState({ repairs: res.repairs }))
             .catch(err => console.log(err));   
     }
-  
-    getCarsData = async() => {
-      const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
-      const body = await response.json();
-
-      if (response.status !== 200) {
-        throw Error(body);
-      }
-      return body;
-    };
-
-    getRepairsData = async() => {
-        const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/repairs');
-        const body = await response.json();
-    
-        if (response.status !== 200) {
-          throw Error(body) 
-        }
-        return body;
-    };
 
     callDeleteData(repairId) {
-        this.deleteData(repairId)
+        queryFunctions.deleteData(repairId)
             .then(res => this.setState({repairs: res.repairs}))
             .catch(err => console.log(err));
-    }
-  
-    deleteData = async(repairId) => {
-      const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
-        method: 'DELETE'
-      });
-      const body = await response.json();
-  
-      if (response.status !== 200) {
-        throw Error(body) 
-      }
-      return body;
     }
   
     getPutData(repair, setValues) {
@@ -79,7 +49,7 @@ class RepairsComponent extends Component {
     }
   
     callPutData(repairId, values) {
-        this.putData(repairId, values)
+        queryFunctions.putData(repairId, values)
             .then(res => this.setState({ 
                 repairs: res.repairs,
                 shouldGetPostData: false,
@@ -87,30 +57,6 @@ class RepairsComponent extends Component {
                 repairIdUpdate: null
             }))
             .catch(err => alert(err));
-    }
-  
-    putData = async(repairId, values) => {
-        const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
-            method: 'PUT',
-            headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                car: JSON.parse(values.car),
-                description: values.description,
-                date: values.date,
-                cost: values.cost,
-                progress: values.progress,
-                technician: values.technician
-            })
-        });
-        const body = await response.json();
-  
-        if (response.status !== 200) {
-            throw Error(body) 
-        }
-        return body;
     }
   
     getPostData(setValues) {
@@ -126,38 +72,14 @@ class RepairsComponent extends Component {
     }
   
     callPostData(values) {
-      this.postData(values)
-        .then(res => this.setState({ 
-            repairs: res.repairs,
-            shouldGetPostData: false,
-            shouldGetPutData: false,
-            repairIdUpdate: null,
-          }))
-        .catch(err => console.log(err));
-    }
-  
-    postData = async(values) => {
-        const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/repairs', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            car: JSON.parse(values.car),
-            description: values.description,
-            date: values.date,
-            cost: values.cost,
-            progress: values.progress,
-            technician: values.technician
-        })
-        });
-        const body = await response.json();
-
-        if (response.status !== 200) {
-            throw Error(body) 
-        }
-        return body;
+        queryFunctions.postData(values)
+            .then(res => this.setState({ 
+                repairs: res.repairs,
+                shouldGetPostData: false,
+                shouldGetPutData: false,
+                repairIdUpdate: null,
+            }))
+            .catch(err => console.log(err));
     }
   
     tableStyles() {
@@ -266,7 +188,7 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="description" />
             </td>
             <td>
-                <Field type="text" name="cost" placeHolder="Cost" />
+                <Field type="text" name="cost" placeHolder="Cost (in Dollars)" />
                 <ErrorMessage name="cost" />
             </td>
             <td>
