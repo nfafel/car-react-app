@@ -180,12 +180,12 @@ class CarsComponent extends Component {
         return allModels;
     }
     
-    carForm = (values) => {
+    carForm = (values, submitForm) => {
         var actionButtons;
         if (this.state.shouldGetPutData) {
             actionButtons = (
                 <td>
-                    <button type="button" onClick={() => this.callPutData(this.state.carIdUpdate, values)}>UPDATE</button>
+                    <button type="button" onClick={() => submitForm()}>UPDATE</button>
                 </td>
             )
         } else {
@@ -226,7 +226,7 @@ class CarsComponent extends Component {
         )
     }
   
-    getCarsDisplay = (setValues, values) => {
+    getCarsDisplay = (setValues, values, submitForm) => {
 
         var carsDisplay;
         if (this.state.cars == null) {
@@ -234,7 +234,7 @@ class CarsComponent extends Component {
         } else {
             carsDisplay = this.state.cars.map((car) => { 
             if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
-                return (this.carForm(values));
+                return (this.carForm(values, submitForm));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
                 <tr style={this.rowColStyles}>
@@ -260,7 +260,7 @@ class CarsComponent extends Component {
             }
             });
             if (this.state.shouldGetPostData) {
-            carsDisplay.push([this.carForm(values)]);
+            carsDisplay.push([this.carForm(values, submitForm)]);
             }
         }
         return carsDisplay;
@@ -311,7 +311,7 @@ class CarsComponent extends Component {
                     this.handleCorrectSumbit(values)
                 }}
                 >
-                {({setValues, values, resetForm}) => (
+                {({setValues, values, resetForm, submitForm}) => (
                 <Form>
                     <table style={this.tableStyles}>
                     <tr style={this.rowColStyles}>
@@ -321,7 +321,7 @@ class CarsComponent extends Component {
                         <th>Rating</th>
                         <th>Actions</th>
                     </tr>
-                    {this.getCarsDisplay(setValues, values)}
+                    {this.getCarsDisplay(setValues, values, submitForm)}
                     </table>
                     <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>                </Form>
                 )}

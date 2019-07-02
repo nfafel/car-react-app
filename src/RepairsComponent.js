@@ -59,9 +59,9 @@ class RepairsComponent extends Component {
             .catch(err => alert(err));
     }
   
-    getPostData(setValues) {
+    getPostData(resetForm) {
       this.setState({shouldGetPostData: true});
-      setValues({
+      resetForm({
         car: "",
         description: "",
         date: "",
@@ -130,7 +130,7 @@ class RepairsComponent extends Component {
         return carOptions;
     }
     
-    updateRepairForm = (values) => {
+    updateRepairForm = (values, submitForm) => {
       return (
         <tr style={this.rowColStyles()}>
             <td>
@@ -164,7 +164,7 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="technician" />
             </td>
             <td>
-                <button type="button" onClick={() => this.callPutData(this.state.repairIdUpdate, values)}>UPDATE</button>
+                <button type="button" onClick={() => submitForm()}>UPDATE</button>
             </td>
         </tr>
       )
@@ -211,14 +211,14 @@ class RepairsComponent extends Component {
         </tr>
     )}
   
-    getRepairsDisplay = (setValues, values) => {
+    getRepairsDisplay = (setValues, values, submitForm) => {
         var repairsDisplay;
         if (this.state.repairs == null) {
             repairsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
         } else {
             repairsDisplay = this.state.repairs.map((repair) => { 
             if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
-                return (this.updateRepairForm(values));
+                return (this.updateRepairForm(values, submitForm));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
                 <tr style={this.rowColStyles()}>
@@ -290,7 +290,7 @@ class RepairsComponent extends Component {
                     this.handleCorrectSumbit(values)
                 }}
                 >
-                {({setValues, values}) => (
+                {({setValues, values, resetForm, submitForm}) => (
                 <Form>
                     <table style={this.tableStyles()}>
                     <tr style={this.rowColStyles()}>
@@ -302,9 +302,10 @@ class RepairsComponent extends Component {
                         <th>Technician</th>
                         <th>Actions</th>
                     </tr>
-                    {this.getRepairsDisplay(setValues, values)}
+                    {this.getRepairsDisplay(setValues, values, submitForm)}
                     </table>
-                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(setValues)}>NEW REPAIR</button>
+                    {this.get}
+                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>
                 </Form>
                 )}
                 </Formik>
