@@ -15,6 +15,7 @@ class CarsComponent extends Component {
         shouldGetPutData: false,
         carIdUpdate: null,
         repairsForCar: null,
+        repairCarId: null,
         repairCarMake: null,
         repairCarModel: null,
         repairCarYear: null,
@@ -41,6 +42,13 @@ class CarsComponent extends Component {
         queryFunctions.deleteData(carId)
             .then(res => this.setState({cars: res.cars}))
             .catch(err => console.log(err));
+
+        queryFunctions.deleteRepairsWithCar(carId)
+            .catch(err => console.log(err));
+
+        if (this.state.repairCarId === carId) {
+            this.setState( {repairsForCar: null} );
+        }
     }
   
     getPutData(car, setValues) {
@@ -63,7 +71,7 @@ class CarsComponent extends Component {
                 shouldGetPostData: false,
                 shouldGetPutData: false,
                 carIdUpdate: null
-                }))
+            }))
             .catch(err => console.log(err));
     }
   
@@ -89,10 +97,11 @@ class CarsComponent extends Component {
             .catch(err => console.log(err));
     }
 
-    setRepairsForCar = (repairsForCarId, repairCarMake, repairCarModel, repairCarYear) => {
-        queryFunctions.getRepairsForCar(repairsForCarId)
+    setRepairsForCar = (repairCarId, repairCarMake, repairCarModel, repairCarYear) => {
+        queryFunctions.getRepairsForCar(repairCarId)
             .then(res => this.setState({ 
                 repairsForCar: res.repairsForCar,
+                repairCarId: repairCarId,
                 repairCarMake: repairCarMake,
                 repairCarModel: repairCarModel,
                 repairCarYear: repairCarYear
@@ -126,19 +135,19 @@ class CarsComponent extends Component {
         return allYears;
     }
 
-    getMakeOptions = (values) => {
+    getMakeOptions = (values, setFieldValue) => {
         if (values.year === "") {
-            return [<option value="">Select a Make</option>, <option value="">Select a Year to see Car Makes</option>]
+            return [<option value="" selected>Select a Make</option>, <option value="">Select a Year to see Car Makes</option>]
         }
 
         if (this.state.newCarYear !== values.year) {
-            
+            if (!this.state.shouldGetPutData) {
+                setFieldValue('make', "");
+            }
             this.setState( {newCarYear: values.year} );
-            
             queryFunctions.getAllCarMakes(values.year)
                 .then(res => this.setState({ allMakes: res.Makes }))
-                .catch(err => alert(err));
-        
+                .catch(err => alert(err)); 
         }
 
         if (this.state.allMakes == null ) {
@@ -153,13 +162,15 @@ class CarsComponent extends Component {
         return allMakes;
     }
 
-    getModelOptions = (values) => {
+    getModelOptions = (values, setFieldValue) => {
         if (values.make === "") {
             return [<option value="">Select a Model</option>, <option value="">Select a Make to see Car Models</option>]
         }
 
         if (this.state.newCarMake !== values.make) {
-            
+            if (!this.state.shouldGetPutData) {
+                setFieldValue('model', "");
+            }
             this.setState( {newCarMake: values.make} );
             
             queryFunctions.getAllCarModels(values.make, values.year)
@@ -180,7 +191,7 @@ class CarsComponent extends Component {
         return allModels;
     }
     
-    carForm = (values, submitForm) => {
+    carForm = (values, submitForm, setFieldValue) => {
         var actionButtons;
         if (this.state.shouldGetPutData) {
             actionButtons = (
@@ -207,13 +218,13 @@ class CarsComponent extends Component {
                 </td>
                 <td>
                     <Field component="select" name="make" placeHolder="Make" >
-                        {this.getMakeOptions(values)}
+                        {this.getMakeOptions(values, setFieldValue)}
                     </Field>
                     <ErrorMessage name="make" />
                 </td>
                 <td>
                     <Field component="select" name="model" placeHolder="Model" >
-                        {this.getModelOptions(values)}
+                        {this.getModelOptions(values, setFieldValue)}
                     </Field>
                     <ErrorMessage name="model" />
                 </td>
@@ -226,7 +237,7 @@ class CarsComponent extends Component {
         )
     }
   
-    getCarsDisplay = (setValues, values, submitForm) => {
+    getCarsDisplay = (setValues, values, submitForm, setFieldValue) => {
 
         var carsDisplay;
         if (this.state.cars == null) {
@@ -234,7 +245,7 @@ class CarsComponent extends Component {
         } else {
             carsDisplay = this.state.cars.map((car) => { 
             if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
-                return (this.carForm(values, submitForm));
+                return (this.carForm(values, submitForm, setFieldValue));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
                 <tr style={this.rowColStyles}>
@@ -260,7 +271,7 @@ class CarsComponent extends Component {
             }
             });
             if (this.state.shouldGetPostData) {
-            carsDisplay.push([this.carForm(values, submitForm)]);
+            carsDisplay.push([this.carForm(values, submitForm, setFieldValue)]);
             }
         }
         return carsDisplay;
@@ -299,6 +310,12 @@ class CarsComponent extends Component {
             return (<br></br>)
         }
     }
+
+    getNewCarButton = (resetForm) => {
+        if (!(this.state.shouldGetPutData || this.state.shouldGetPostData)) {
+            return (<button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>)
+        }
+    }
   
     render() {
 
@@ -311,7 +328,7 @@ class CarsComponent extends Component {
                     this.handleCorrectSumbit(values)
                 }}
                 >
-                {({setValues, values, resetForm, submitForm}) => (
+                {({setValues, values, resetForm, submitForm, setFieldValue}) => (
                 <Form>
                     <table style={this.tableStyles}>
                     <tr style={this.rowColStyles}>
@@ -321,9 +338,10 @@ class CarsComponent extends Component {
                         <th>Rating</th>
                         <th>Actions</th>
                     </tr>
-                    {this.getCarsDisplay(setValues, values, submitForm)}
+                    {this.getCarsDisplay(setValues, values, submitForm, setFieldValue)}
                     </table>
-                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>                </Form>
+                    {this.getNewCarButton(resetForm)}
+                </Form>
                 )}
                 </Formik>
                 {this.showRepairsForCar()}

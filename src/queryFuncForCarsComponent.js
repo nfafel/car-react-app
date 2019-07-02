@@ -10,15 +10,27 @@ exports.getCarsData = async() => {
 
 
 exports.deleteData = async(carId) => {
-const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-    method: 'DELETE'
-});
-const body = await response.json();
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
+      method: 'DELETE'
+  });
+  const body = await response.json();
 
-if (response.status !== 200) {
-    throw Error(body) 
+  if (response.status !== 200) {
+      throw Error(body) 
+  }
+  return body;
 }
-return body;
+
+exports.deleteRepairsWithCar = async(carId) => {
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}/repairs`, {
+      method: 'DELETE'
+  });
+  const body = await response.json();
+
+  if (response.status !== 200) {
+      throw Error(body) 
+  }
+  return body;
 }
 
 exports.putData = async(carId, values) => {
