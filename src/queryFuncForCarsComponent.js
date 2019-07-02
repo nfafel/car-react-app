@@ -74,3 +74,39 @@ exports.getRepairsForCar = async(repairsForCarId) => {
     }
     return body;
 };
+
+exports.getAllCarYears = async() => {
+  const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/api/0.3/?cmd=getYears', {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  });
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    throw Error(body) 
+  }
+  return body;
+};
+
+
+exports.getAllCarMakes = async(year) => {
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/api/0.3/?cmd=getMakes&year=${year}`);
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    throw Error(body) 
+  }
+  return body;
+};
+
+exports.getAllCarModels = async(make, year) => {
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/api/0.3/?cmd=getModels&make=${make}&year=${year}`);
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    throw Error(body) 
+  }
+  return body;
+};
