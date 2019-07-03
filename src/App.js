@@ -3,9 +3,15 @@ import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import CarsComponent from './CarsComponent'
 import RepairsComponent from './RepairsComponent'
+import HomeComponent from './HomeComponent'
 
 function Index() {
-  return <h2>Home</h2>;
+  return (
+    <div>
+      <h2>Last Logged Repairs</h2>
+      <HomeComponent />
+    </div>
+  )
 }
 
 function Cars() {

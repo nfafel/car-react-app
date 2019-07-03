@@ -164,6 +164,7 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="technician" />
             </td>
             <td>
+                <button type="button" onClick={()=>{this.setState({shouldGetPutData:false})}}>CANCEL</button>
                 <button type="button" onClick={() => submitForm()}>UPDATE</button>
             </td>
         </tr>
@@ -194,9 +195,9 @@ class RepairsComponent extends Component {
             <td>
                 <Field name="progress" placeHolder="Progress" component="select" >
                     <option value="">Select Progress</option>
-                    <option value="ready">Ready</option>
-                    <option value="inProgress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="Ready">Ready</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
                 </Field>
                 <ErrorMessage name="progress" />
             </td>
@@ -205,7 +206,7 @@ class RepairsComponent extends Component {
                 <ErrorMessage name="technician" />
             </td>
             <td>
-                <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>cancel</button>
+                <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>CANCEL</button>
                 <button type="submit">SUMBIT</button>
             </td>
         </tr>
@@ -278,6 +279,12 @@ class RepairsComponent extends Component {
         technician: Yup.string()
             .required('Required')
     })
+
+    getNewRepairButton = (resetForm) => {
+        if (!(this.state.shouldGetPostData || this.state.shouldGetPutData)) {
+            return (<button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>)
+        }
+    }
   
     render() {
   
@@ -304,8 +311,7 @@ class RepairsComponent extends Component {
                     </tr>
                     {this.getRepairsDisplay(setValues, values, submitForm)}
                     </table>
-                    {this.get}
-                    <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>
+                    {this.getNewRepairButton(resetForm)}
                 </Form>
                 )}
                 </Formik>
