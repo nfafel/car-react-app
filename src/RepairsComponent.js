@@ -5,31 +5,86 @@ import * as Yup from 'yup'
 
 const queryFunctions = require('./queryFuncForRepairsComponent');
 
+class RepairWithCar {
+    constructor(car, repair) {
+        this.car = car;
+        this._id = repair._id;
+        this.description = repair.description;
+        this.cost = repair.cost;
+        this.date = repair.date;
+        this.progress = repair.progress;
+        this.technician = repair.technician;
+    }
+}
+
 class RepairsComponent extends Component {
     constructor(props){
       super(props);
       this.state = {
         cars: null,
-        repairs: null,
+        mergedRepairs: null,
         shouldGetPostData: false,
         shouldGetPutData: false,
         repairIdUpdate: null
       }
     }
     
+    /*
     componentDidMount() {
-        queryFunctions.getCarsData()
-            .then(res => this.setState({ cars: res.cars }))
-            .catch(err => console.log(err));
+         queryFunctions.getCarsData()
+             .then(res => this.setState({ cars: res.cars }))
+             .catch(err => console.log(err));
 
-        queryFunctions.getRepairsData()
-            .then(res => this.setState({ repairs: res.repairs }))
-            .catch(err => console.log(err));   
+         queryFunctions.getRepairsData()
+             .then(res => this.setState({ repairs: res.repairs }))
+             .catch(err => console.log(err));  
+    }
+    */
+
+    
+    async componentDidMount() {
+        try {
+            const carsResponse = await queryFunctions.getCarsData();
+            const cars = carsResponse.cars;
+
+            const repairsResponse = await queryFunctions.getRepairsData();
+            const repairs = repairsResponse.repairs;
+
+            var mergedRepairData = [];
+            for (var i=0; i< repairs.length; i++) {
+                var carForRepair = this.getCarForRepair(cars, repairs[i].car_id);
+                mergedRepairData.push(new RepairWithCar(carForRepair, repairs[i]))
+            }
+            this.setState({
+                mergedRepairs: mergedRepairData, 
+                cars:cars
+            });
+
+        } catch(e) {
+            console.error(e);
+        }
     }
 
+    getCarForRepair = (allCars, carId) => {
+        for (var i = 0; i<allCars.length; i++) {
+            if (allCars[i]._id === carId) {
+                return allCars[i];
+            }
+        }
+    }
+    
     callDeleteData(repairId) {
         queryFunctions.deleteData(repairId)
-            .then(res => this.setState({repairs: res.repairs}))
+            .then(res => {
+                var mergedRepairData = [];
+                for (var i=0; i< res.repairs.length; i++) {
+                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
+                }
+                this.setState({
+                    mergedRepairs: mergedRepairData
+                });
+            })
             .catch(err => console.log(err));
     }
   
@@ -39,7 +94,7 @@ class RepairsComponent extends Component {
             repairIdUpdate: repair._id
         });
         setValues({
-            car: JSON.stringify(repair.car),
+            car_id: repair.car._id,
             description: repair.description,
             date: repair.date,
             cost: repair.cost,
@@ -50,19 +105,25 @@ class RepairsComponent extends Component {
   
     callPutData(repairId, values) {
         queryFunctions.putData(repairId, values)
-            .then(res => this.setState({ 
-                repairs: res.repairs,
-                shouldGetPostData: false,
-                shouldGetPutData: false,
-                repairIdUpdate: null
-            }))
+            .then(res => {
+                var mergedRepairData = [];
+                for (var i=0; i< res.repairs.length; i++) {
+                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
+                }
+                this.setState({
+                    mergedRepairs: mergedRepairData, 
+                    shouldGetPutData: false,
+                    repairIdUpdate: null
+                });
+            })
             .catch(err => alert(err));
     }
   
     getPostData(resetForm) {
       this.setState({shouldGetPostData: true});
       resetForm({
-        car: "",
+        car_id: "",
         description: "",
         date: "",
         cost: "",
@@ -73,12 +134,17 @@ class RepairsComponent extends Component {
   
     callPostData(values) {
         queryFunctions.postData(values)
-            .then(res => this.setState({ 
-                repairs: res.repairs,
-                shouldGetPostData: false,
-                shouldGetPutData: false,
-                repairIdUpdate: null,
-            }))
+            .then(res => {
+                var mergedRepairData = [];
+                for (var i=0; i< res.repairs.length; i++) {
+                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
+                }
+                this.setState({
+                    mergedRepairs: mergedRepairData, 
+                    shouldGetPostData: false
+                });
+            })
             .catch(err => console.log(err));
     }
   
@@ -100,30 +166,27 @@ class RepairsComponent extends Component {
 
     carOptions = (values) => {
         var carOptions;
-        if (this.state.cars == null) {
-            carOptions = (<p>Loading...</p>);
-        } else {
+        
             carOptions = this.state.cars.filter((car) => {
-                if (this.state.shouldGetPutData && (JSON.stringify(car) === values.car)) {
+                if (this.state.shouldGetPutData && (car._id === values.car_id)) {
                     return false;
                 } else {
                     return true;
                 }
             }).map((car) => {
                 return (
-                    <option value={JSON.stringify(car)} >
+                    <option value={car._id} >
                         {car.year} {car.make} {car.model}
                     </option>
                 )
             })
-        }
+        
        
         if (this.state.shouldGetPutData) {
-            var chosenCar = JSON.parse(values.car);
-            var chosenCarMake = chosenCar.make;
-            var chosenCarModel = chosenCar.model;
-            var chosenCarYear = chosenCar.year;
-            carOptions.splice(0,0, <option value={values.car}>{chosenCarYear} {chosenCarMake} {chosenCarModel}</option>);
+            //alert(this.state.cars + "  " + values.car_id);
+            var carUpdated = this.getCarForRepair(this.state.cars, values.car_id);
+            //alert(carUpdated);
+            carOptions.splice(0,0, <option value={values.car_id}>{carUpdated.year} {carUpdated.make} {carUpdated.model}</option>);
         } else {
             carOptions.splice(0,0, <option value=''>Select a Car</option>);
         }
@@ -134,10 +197,10 @@ class RepairsComponent extends Component {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-                <Field name="car" component="select">
+                <Field name="car_id" component="select">
                     {this.carOptions(values)}
                 </Field>
-                <ErrorMessage name="car" />
+                <ErrorMessage name="car_id" />
             </td>
             <td>
                 <Field type="date" name="date" value={values.date.split('T', 1)}/>
@@ -175,10 +238,10 @@ class RepairsComponent extends Component {
       return (
         <tr style={this.rowColStyles()}>
             <td>
-                <Field name="car" component="select" placeHolder="car">
+                <Field name="car_id" component="select" placeHolder="car_id">
                     {this.carOptions()}
                 </Field>
-                <ErrorMessage name="car" />
+                <ErrorMessage name="car_id" />
             </td>
             <td>
                 <Field type="date" name="date" placeHolder="Date" />
@@ -211,13 +274,9 @@ class RepairsComponent extends Component {
             </td>
         </tr>
     )}
-  
+
     getRepairsDisplay = (setValues, values, submitForm) => {
-        var repairsDisplay;
-        if (this.state.repairs == null) {
-            repairsDisplay = <tr style={this.rowColStyles()}>"Loading ..."</tr>;
-        } else {
-            repairsDisplay = this.state.repairs.map((repair) => { 
+        var repairsDisplay = this.state.mergedRepairs.map((repair) => { 
             if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
                 return (this.updateRepairForm(values, submitForm));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
@@ -250,8 +309,7 @@ class RepairsComponent extends Component {
         if (this.state.shouldGetPostData) {
             repairsDisplay.push([this.newRepairForm()]);
         }
-      }
-      return repairsDisplay;
+        return repairsDisplay;
     }
   
     handleCorrectSumbit = (values) => {
@@ -263,7 +321,7 @@ class RepairsComponent extends Component {
     }
   
     RepairValidationSchema = Yup.object().shape({
-        car: Yup.string("No Car Selected")
+        car_id: Yup.string()
             .required('Required'),
         description: Yup.string()
             .required('Required'),
@@ -287,11 +345,14 @@ class RepairsComponent extends Component {
     }
   
     render() {
+        if (this.state.cars == null || this.state.mergedRepairs == null) {
+            return <h4>Loading...</h4>
+        }
   
         return(
             <div>
                 <Formik
-                initialValues = {{car: '', description: '', date: '', cost: '', progress: '', technician: ''}}
+                initialValues = {{car_id: '', description: '', date: '', cost: '', progress: '', technician: ''}}
                 validationSchema={this.RepairValidationSchema}
                 onSubmit = {(values) => {
                     this.handleCorrectSumbit(values)

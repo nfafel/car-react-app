@@ -8,6 +8,15 @@ exports.getCarsData = async() => {
     return body;
 };
 
+exports.getCarById = async(carId) => {
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`);
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    throw Error(body) 
+  }
+  return body;
+};
 
 exports.deleteData = async(carId) => {
   const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
@@ -96,7 +105,6 @@ exports.getAllCarYears = async() => {
   }
   return body;
 };
-
 
 exports.getAllCarMakes = async(year) => {
   const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/makes/${year}`);

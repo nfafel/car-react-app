@@ -38,7 +38,7 @@ exports.putData = async(repairId, values) => {
         'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            car: JSON.parse(values.car),
+            car_id: values.car_id,
             description: values.description,
             date: values.date,
             cost: values.cost,
@@ -62,7 +62,7 @@ exports.postData = async(values) => {
         'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-        car: JSON.parse(values.car),
+        car_id: values.car_id,
         description: values.description,
         date: values.date,
         cost: values.cost,

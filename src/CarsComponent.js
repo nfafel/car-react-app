@@ -238,12 +238,7 @@ class CarsComponent extends Component {
     }
   
     getCarsDisplay = (setValues, values, submitForm, setFieldValue) => {
-
-        var carsDisplay;
-        if (this.state.cars == null) {
-            carsDisplay = <tr style={this.rowColStyles}>"Loading ..."</tr>;
-        } else {
-            carsDisplay = this.state.cars.map((car) => { 
+        var carsDisplay = this.state.cars.map((car) => { 
             if (this.state.shouldGetPutData && car._id === this.state.carIdUpdate) {
                 return (this.carForm(values, submitForm, setFieldValue));
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
@@ -269,10 +264,9 @@ class CarsComponent extends Component {
                     </td>
                 </tr>)
             }
-            });
-            if (this.state.shouldGetPostData) {
+        });
+        if (this.state.shouldGetPostData) {
             carsDisplay.push([this.carForm(values, submitForm, setFieldValue)]);
-            }
         }
         return carsDisplay;
     }
@@ -318,6 +312,9 @@ class CarsComponent extends Component {
     }
   
     render() {
+        if (this.state.cars == null) {
+            return <h4>Loading...</h4>
+        }
 
         return(
             <div>
