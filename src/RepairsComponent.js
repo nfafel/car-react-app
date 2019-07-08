@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
-import * as Yup from 'yup'
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+
+import RepairFormComponent from './RepairFormComponent'
 
 const queryFunctions = require('./queryFuncForRepairsComponent');
 
@@ -28,19 +30,6 @@ class RepairsComponent extends Component {
         repairIdUpdate: null
       }
     }
-    
-    /*
-    componentDidMount() {
-         queryFunctions.getCarsData()
-             .then(res => this.setState({ cars: res.cars }))
-             .catch(err => console.log(err));
-
-         queryFunctions.getRepairsData()
-             .then(res => this.setState({ repairs: res.repairs }))
-             .catch(err => console.log(err));  
-    }
-    */
-
     
     async componentDidMount() {
         try {
@@ -164,121 +153,10 @@ class RepairsComponent extends Component {
         });
     };
 
-    carOptions = (values) => {
-        var carOptions;
-        
-            carOptions = this.state.cars.filter((car) => {
-                if (this.state.shouldGetPutData && (car._id === values.car_id)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }).map((car) => {
-                return (
-                    <option value={car._id} >
-                        {car.year} {car.make} {car.model}
-                    </option>
-                )
-            })
-        
-       
-        if (this.state.shouldGetPutData) {
-            //alert(this.state.cars + "  " + values.car_id);
-            var carUpdated = this.getCarForRepair(this.state.cars, values.car_id);
-            //alert(carUpdated);
-            carOptions.splice(0,0, <option value={values.car_id}>{carUpdated.year} {carUpdated.make} {carUpdated.model}</option>);
-        } else {
-            carOptions.splice(0,0, <option value=''>Select a Car</option>);
-        }
-        return carOptions;
-    }
-    
-    updateRepairForm = (values, submitForm) => {
-      return (
-        <tr style={this.rowColStyles()}>
-            <td>
-                <Field name="car_id" component="select">
-                    {this.carOptions(values)}
-                </Field>
-                <ErrorMessage name="car_id" />
-            </td>
-            <td>
-                <Field type="date" name="date" value={values.date.split('T', 1)}/>
-                <ErrorMessage name="date" />
-            </td>
-            <td>
-                <Field type="text" name="description" />
-                <ErrorMessage name="description" />
-            </td>
-            <td>
-                <Field type="text" name="cost" />
-                <ErrorMessage name="cost" />
-            </td>
-            <td>
-                <Field name="progress" component="select" value={values.progress}>
-                    <option value="Ready">Ready</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                </Field>
-                <ErrorMessage name="progress" />
-            </td>
-            <td>
-                <Field type="text" name="technician" />
-                <ErrorMessage name="technician" />
-            </td>
-            <td>
-                <button type="button" onClick={()=>{this.setState({shouldGetPutData:false})}}>CANCEL</button>
-                <button type="button" onClick={() => submitForm()}>UPDATE</button>
-            </td>
-        </tr>
-      )
-    }
-  
-    newRepairForm = () => {
-      return (
-        <tr style={this.rowColStyles()}>
-            <td>
-                <Field name="car_id" component="select" placeHolder="car_id">
-                    {this.carOptions()}
-                </Field>
-                <ErrorMessage name="car_id" />
-            </td>
-            <td>
-                <Field type="date" name="date" placeHolder="Date" />
-                <ErrorMessage name="date" />
-            </td>
-            <td>
-                <Field type="text" name="description" placeHolder="Description" />
-                <ErrorMessage name="description" />
-            </td>
-            <td>
-                <Field type="text" name="cost" placeHolder="Cost (in Dollars)" />
-                <ErrorMessage name="cost" />
-            </td>
-            <td>
-                <Field name="progress" placeHolder="Progress" component="select" >
-                    <option value="">Select Progress</option>
-                    <option value="Ready">Ready</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                </Field>
-                <ErrorMessage name="progress" />
-            </td>
-            <td>
-                <Field type="text" name="technician" placeHolder="Technician" />
-                <ErrorMessage name="technician" />
-            </td>
-            <td>
-                <button type="button" onClick={()=>{this.setState({shouldGetPostData:false})}}>CANCEL</button>
-                <button type="submit">SUMBIT</button>
-            </td>
-        </tr>
-    )}
-
-    getRepairsDisplay = (setValues, values, submitForm) => {
+    getRepairsDisplay = (setValues, values) => {
         var repairsDisplay = this.state.mergedRepairs.map((repair) => { 
             if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
-                return (this.updateRepairForm(values, submitForm));
+                return (<RepairFormComponent cars={this.state.cars} values={values} formType={"update"} cancel={() => this.setState({shouldGetPutData: false})} /> );
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
                 <tr style={this.rowColStyles()}>
@@ -307,7 +185,7 @@ class RepairsComponent extends Component {
             }
         });
         if (this.state.shouldGetPostData) {
-            repairsDisplay.push([this.newRepairForm()]);
+            repairsDisplay.push(<RepairFormComponent cars={this.state.cars} values={values} formType={"new"} cancel={() => this.setState({shouldGetPostData: false})} />);
         }
         return repairsDisplay;
     }
@@ -358,7 +236,7 @@ class RepairsComponent extends Component {
                     this.handleCorrectSumbit(values)
                 }}
                 >
-                {({setValues, values, resetForm, submitForm}) => (
+                {({setValues, values, resetForm}) => (
                 <Form>
                     <table style={this.tableStyles()}>
                     <tr style={this.rowColStyles()}>
@@ -370,7 +248,7 @@ class RepairsComponent extends Component {
                         <th>Technician</th>
                         <th>Actions</th>
                     </tr>
-                    {this.getRepairsDisplay(setValues, values, submitForm)}
+                    {this.getRepairsDisplay(setValues, values)}
                     </table>
                     {this.getNewRepairButton(resetForm)}
                 </Form>

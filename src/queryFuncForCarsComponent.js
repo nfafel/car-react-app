@@ -87,7 +87,7 @@ exports.postData = async(values) => {
 }
 
 exports.getRepairsForCar = async(repairsForCarId) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/repairForCar/${repairsForCarId}`);
+    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`);
     const body = await response.json();
 
     if (response.status !== 200) {

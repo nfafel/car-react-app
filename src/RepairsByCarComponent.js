@@ -25,7 +25,7 @@ class RepairsByCarComponent extends Component {
         }
         return(
             <div>
-                <h3>Repairs for the {this.props.repairsForCar[0].car.year} {this.props.repairsForCar[0].car.make} {this.props.repairsForCar[0].car.model}</h3>
+                <h3>Repairs for the {this.props.repairCarYear} {this.props.repairCarMake} {this.props.repairCarModel}</h3>
                 <table style={this.props.tableStyles}>
                     <tr style={this.props.rowColStyles}>
                         <th>Date</th>
