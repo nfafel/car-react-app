@@ -6,6 +6,7 @@ import RepairsByCarComponent from './RepairsByCarComponent'
 import CarFormComponent from './CarFormComponent'
 
 const queryFunctions = require('./queryFuncForCarsComponent')
+const graphQLQueryFunctions = require('./graphQLQueriesForCars')
 
 class CarsComponent extends Component {
     constructor(props) {
@@ -25,18 +26,15 @@ class CarsComponent extends Component {
     
     componentDidMount() {
         queryFunctions.getCarsData()
-            .then(res => this.setState({ cars: res.cars }))
+            .then(res => this.setState({ cars: res }))
             .catch(err => console.log(err));
     }
   
     callDeleteData(carId) {
         queryFunctions.deleteData(carId)
-            .then(res => this.setState({cars: res.cars}))
+            .then(res => this.setState({cars: res}))
             .catch(err => console.log(err));
-
-        queryFunctions.deleteRepairsWithCar(carId)
-            .catch(err => console.log(err));
-
+        
         if (this.state.repairCarId === carId) {
             this.setState( {repairsForCar: null} );
         }
@@ -58,14 +56,12 @@ class CarsComponent extends Component {
     callPutData(carId, values) {
         queryFunctions.putData(carId, values)
             .then(res => this.setState({ 
-                cars: res.cars,
-                shouldGetPostData: false,
+                cars: res,
                 shouldGetPutData: false,
                 carIdUpdate: null
             }))
             .catch(err => console.log(err));
     }
-  
   
     getPostData(resetForm) {
         this.setState({shouldGetPostData: true});
@@ -80,9 +76,8 @@ class CarsComponent extends Component {
     callPostData(values) {
         queryFunctions.postData(values)
             .then(res => this.setState({ 
-                cars: res.cars,
+                cars: res,
                 shouldGetPostData: false,
-                shouldGetPutData: false,
                 carIdUpdate: null,
             }))
             .catch(err => console.log(err));
@@ -91,7 +86,7 @@ class CarsComponent extends Component {
     setRepairsForCar = (repairCarId, repairCarMake, repairCarModel, repairCarYear) => {
         queryFunctions.getRepairsForCar(repairCarId)
             .then(res => this.setState({ 
-                repairsForCar: res.repairsForCar,
+                repairsForCar: res,
                 repairCarId: repairCarId,
                 repairCarMake: repairCarMake,
                 repairCarModel: repairCarModel,

@@ -1,48 +1,67 @@
-exports.getCarsData = async() => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
-    const body = await response.json();
+import ApolloClient, {gql} from "apollo-boost";
 
-    if (response.status !== 200) {
-      throw Error(body) 
-    }
-    return body.cars;
+const client = new ApolloClient({
+  uri: "http://localhost:4000/"
+});
+
+export const getCarsData = async() => {
+  const result = await client.query({
+    query: gql`
+      query {
+        cars {
+          _id 
+          make
+          model 
+          year
+          rating
+        }
+      }
+    `
+  });
+  return result.data;
 };
 
-exports.deleteData = async(carId) => {
-  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-      method: 'DELETE'
+export const deleteData = async(carId) => {
+  const result = await client.mutate({
+    mutation: gql` 
+      mutation {
+        removeCar(id: "${carId}") {
+          _id 
+          make
+          model 
+          year
+          rating
+        }
+      }
+    `
   });
-  const body = await response.json();
-
-  if (response.status !== 200) {
-      throw Error(body) 
-  }
-  return body.cars;
+  return result.data;
 }
 
-exports.putData = async(carId, values) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
-      method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        make: values.make,
-        model: values.model,
-        year: values.year,
-        rating: values.rating
-      })
-    });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body) 
-    }
-    return body.cars;
+export const putData = async(carId, values) => {
+  var carUpdates= {
+    make: values.make,
+    model: values.model,
+    year: values.year,
+    rating: values.rating
+  };
+  const result = await client.mutate({
+    mutation: gql`
+      mutation {
+        updateCar(id: ${carId}, input: ${carUpdates}) {
+          _id 
+          make
+          model 
+          year
+          rating
+        }
+      }
+    `
+  });
+  return result.data;
 }
 
-exports.postData = async(values) => {
+export const postData = async(values) => {
     const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
       method: 'POST',
       headers: {
@@ -61,20 +80,20 @@ exports.postData = async(values) => {
     if (response.status !== 200) {
       throw Error(body) 
     }
-    return body.cars;
+    return body;
 }
 
-exports.getRepairsForCar = async(repairsForCarId) => {
+export const getRepairsForCar = async(repairsForCarId) => {
     const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`);
     const body = await response.json();
 
     if (response.status !== 200) {
         throw Error(body);
     }
-    return body.repairsForCar;
+    return body;
 };
 
-exports.getAllCarYears = async() => {
+export const getAllCarYears = async() => {
   const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars/years');
   const body = await response.json();
 
@@ -84,7 +103,7 @@ exports.getAllCarYears = async() => {
   return body;
 };
 
-exports.getAllCarMakes = async(year) => {
+export const getAllCarMakes = async(year) => {
   const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/makes/${year}`);
   const body = await response.json();
 
@@ -94,7 +113,7 @@ exports.getAllCarMakes = async(year) => {
   return body;
 };
 
-exports.getAllCarModels = async(make, year) => {
+export const getAllCarModels = async(make, year) => {
   const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/models/${year}/${make}`);
   const body = await response.json();
 
