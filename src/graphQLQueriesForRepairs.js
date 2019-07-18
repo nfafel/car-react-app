@@ -1,21 +1,56 @@
-exports.getCarsData = async() => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
-    const body = await response.json();
+import ApolloClient, {gql} from "apollo-boost";
 
-    if (response.status !== 200) {
-      throw Error(body);
-    }
-    return body;
+const client = new ApolloClient({
+  uri: "http://localhost:4000/"
+});
+
+client.defaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'network-only'
+  },
+  query: {
+    fetchPolicy: 'network-only'
+  }
+}
+
+exports.getCarsData = async() => {
+    const result = await client.query({
+        query:gql`
+            query {
+                cars {
+                    _id
+                    make
+                    model
+                    year
+                    rating
+                }
+            }
+        `
+    });
+    return result.data.cars;
 };
 
 exports.getRepairsData = async() => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/repairs');
-    const body = await response.json();
-
-    if (response.status !== 200) {
-    throw Error(body) 
-    }
-    return body;
+    const result = await client.query({
+        query:gql`
+            query {
+                repairs {
+                    car {
+                        make
+                        model
+                        year
+                        rating
+                    }
+                    date
+                    description
+                    cost
+                    progress
+                    technician
+                }
+            }
+        `
+    });
+    return result.data.repairs;
 };
 
 exports.deleteData = async(repairId) => {

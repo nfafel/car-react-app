@@ -17,13 +17,13 @@ class CarFormComponent extends Component {
 
     componentDidMount() {
         queryFunctions.getAllCarYears()
-            .then(res => this.setState({ yearsRange: res.Years }))
+            .then(res => this.setState({ yearsRange: res }))
             .catch(err => alert(err));
     }
 
     getYearOptions = () => {
         if (this.state.yearsRange == null) {
-            return <p>Loading . . .</p>
+            return <option value="">Loading...</option>
         }
 
         var allYears = [<option value="">Select a Year</option>];
@@ -44,7 +44,7 @@ class CarFormComponent extends Component {
             }
             this.setState( {newCarYear: values.year} );
             queryFunctions.getAllCarMakes(values.year)
-                .then(res => this.setState({ allMakes: res.Makes }))
+                .then(res => this.setState({ allMakes: res }))
                 .catch(err => alert(err)); 
         }
 
@@ -72,7 +72,7 @@ class CarFormComponent extends Component {
             this.setState( {newCarMake: values.make} );
             
             queryFunctions.getAllCarModels(values.make, values.year)
-                .then(res => this.setState({ allModels: res.Models }))
+                .then(res => this.setState({ allModels: res }))
                 .catch(err => alert(err));
 
         }

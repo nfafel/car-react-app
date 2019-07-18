@@ -5,8 +5,8 @@ import * as Yup from 'yup'
 import RepairsByCarComponent from './RepairsByCarComponent'
 import CarFormComponent from './CarFormComponent'
 
-const queryFunctions = require('./queryFuncForCarsComponent')
-const graphQLQueryFunctions = require('./graphQLQueriesForCars')
+//const queryFunctions = require('./queryFuncForCarsComponent')
+const queryFunctions = require('./graphQLQueriesForCars')
 
 class CarsComponent extends Component {
     constructor(props) {
@@ -80,7 +80,7 @@ class CarsComponent extends Component {
                 shouldGetPostData: false,
                 carIdUpdate: null,
             }))
-            .catch(err => console.log(err));
+            .catch(err => alert(err));
     }
 
     setRepairsForCar = (repairCarId, repairCarMake, repairCarModel, repairCarYear) => {
@@ -187,7 +187,7 @@ class CarsComponent extends Component {
         if (this.state.cars == null) {
             return <h4>Loading...</h4>
         }
-
+        
         return(
             <div>
                 <Formik

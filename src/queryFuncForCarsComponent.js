@@ -81,7 +81,7 @@ exports.getAllCarYears = async() => {
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body;
+  return body.Years;
 };
 
 exports.getAllCarMakes = async(year) => {
@@ -91,7 +91,7 @@ exports.getAllCarMakes = async(year) => {
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body;
+  return body.Makes;
 };
 
 exports.getAllCarModels = async(make, year) => {
@@ -101,5 +101,5 @@ exports.getAllCarModels = async(make, year) => {
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body;
+  return body.Models;
 };

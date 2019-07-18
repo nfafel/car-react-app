@@ -4,6 +4,15 @@ const client = new ApolloClient({
   uri: "http://localhost:4000/"
 });
 
+client.defaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'network-only'
+  },
+  query: {
+    fetchPolicy: 'network-only'
+  }
+}
+
 export const getCarsData = async() => {
   const result = await client.query({
     query: gql`
@@ -18,7 +27,7 @@ export const getCarsData = async() => {
       }
     `
   });
-  return result.data;
+  return result.data.cars;
 };
 
 export const deleteData = async(carId) => {
@@ -35,20 +44,20 @@ export const deleteData = async(carId) => {
       }
     `
   });
-  return result.data;
+  return result.data.removeCar;
 }
 
 export const putData = async(carId, values) => {
-  var carUpdates= {
-    make: values.make,
-    model: values.model,
-    year: values.year,
-    rating: values.rating
-  };
   const result = await client.mutate({
+    variables: {input: {
+      make: values.make,
+      model: values.model,
+      year: parseInt(values.year),
+      rating: parseInt(values.rating)
+    }},
     mutation: gql`
-      mutation {
-        updateCar(id: ${carId}, input: ${carUpdates}) {
+      mutation CarUpdatesInput($input: CarInput){
+        updateCar(id: "${carId}", input: $input) {
           _id 
           make
           model 
@@ -58,67 +67,89 @@ export const putData = async(carId, values) => {
       }
     `
   });
-  return result.data;
+  return result.data.updateCar;
 }
 
 export const postData = async(values) => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        make: values.make,
-        model: values.model,
-        year: values.year,
-        rating: values.rating
-      })
-    });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body) 
-    }
-    return body;
+  const result = await client.mutate({
+    variables: {input: {
+      make: values.make,
+      model: values.model,
+      year: parseInt(values.year),
+      rating: parseInt(values.rating)
+    }},
+    mutation: gql`
+      mutation NewCarInput($input: CarInput){
+        createCar(input: $input) {
+          _id 
+          make
+          model 
+          year
+          rating
+        }
+      }
+    `
+  });
+  return result.data.createCar;
 }
 
 export const getRepairsForCar = async(repairsForCarId) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`);
-    const body = await response.json();
-
-    if (response.status !== 200) {
-        throw Error(body);
-    }
-    return body;
+  const result = await client.query({
+    query: gql`
+      query {
+        repairsForCar(carId: "${repairsForCarId}") {
+          date
+          description
+          cost
+          progress
+          technician
+        }
+      }
+    `
+  });
+  return result.data.repairsForCar;
 };
 
 export const getAllCarYears = async() => {
-  const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars/years');
-  const body = await response.json();
-
-  if (response.status !== 200) {
-    throw Error(body) 
-  }
-  return body;
+  const result = await client.query({
+    query: gql`
+      query {
+        allYears {
+          min_year
+          max_year
+        }
+      }
+    `
+  });
+  return result.data.allYears;
 };
 
 export const getAllCarMakes = async(year) => {
-  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/makes/${year}`);
-  const body = await response.json();
-
-  if (response.status !== 200) {
-    throw Error(body) 
-  }
-  return body;
+  const result = await client.query({
+    query: gql`
+      query {
+        allMakes(year: ${year}) {
+          make_id
+          make_display
+          make_is_common
+          make_country
+        }
+      }
+    `
+  });
+  return result.data.allMakes;
 };
 
 export const getAllCarModels = async(make, year) => {
-  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/models/${year}/${make}`);
-  const body = await response.json();
-
-  if (response.status !== 200) {
-    throw Error(body) 
-  }
-  return body;
+  const result = await client.query({
+    query: gql`
+      query {
+        allModels(year: ${year}, make: "${make}") {
+          model_name
+          model_make_id
+        }
+      }
+    `
+  });
+  return result.data.allModels;
 };
