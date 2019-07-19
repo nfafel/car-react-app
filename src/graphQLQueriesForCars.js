@@ -1,7 +1,7 @@
 import ApolloClient, {gql} from "apollo-boost";
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/"
+  uri: "https://tranquil-caverns-41069.herokuapp.com/graphql"
 });
 
 client.defaultOptions = {

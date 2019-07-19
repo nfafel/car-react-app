@@ -13,29 +13,14 @@ client.defaultOptions = {
   }
 }
 
-exports.getCarsData = async() => {
-    const result = await client.query({
-        query:gql`
-            query {
-                cars {
-                    _id
-                    make
-                    model
-                    year
-                    rating
-                }
-            }
-        `
-    });
-    return result.data.cars;
-};
-
-exports.getRepairsData = async() => {
+export const getRepairsData = async() => {
     const result = await client.query({
         query:gql`
             query {
                 repairs {
+                    _id
                     car {
+                        _id
                         make
                         model
                         year
@@ -53,62 +38,93 @@ exports.getRepairsData = async() => {
     return result.data.repairs;
 };
 
-exports.deleteData = async(repairId) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
-      method: 'DELETE'
+export const deleteData = async(repairId) => {
+    const result = await client.mutate({
+        mutation:gql`
+            mutation {
+                removeRepair(id: "${repairId}") {
+                    _id
+                    car {
+                        _id
+                        make
+                        model
+                        year
+                        rating
+                    }
+                    date
+                    description
+                    cost 
+                    progress
+                    technician
+                }
+            }
+        `
     });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw Error(body) 
-    }
-    return body;
+    return result.data.removeRepair;
 }
 
-exports.putData = async(repairId, values) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairId}`, {
-        method: 'PUT',
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+export const putData = async(repairId, values) => {
+    const result = await client.mutate({
+        variables: { input: {
             car_id: values.car_id,
             description: values.description,
             date: values.date,
             cost: values.cost,
             progress: values.progress,
             technician: values.technician
-        })
+        }},
+        mutation:gql`
+            mutation UpdateRepairInput($input: RepairInput){
+                updateRepair(id: "${repairId}", input: $input) {
+                    _id
+                    car {
+                        _id
+                        make
+                        model
+                        year
+                        rating
+                    }
+                    date
+                    description
+                    cost 
+                    progress
+                    technician
+                }
+            }
+        `
     });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-        throw Error(body) 
-    }
-    return body;
+    return result.data.updateRepair;
 }
 
-exports.postData = async(values) => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/repairs', {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        car_id: values.car_id,
-        description: values.description,
-        date: values.date,
-        cost: values.cost,
-        progress: values.progress,
-        technician: values.technician
-    })
+export const postData = async(values) => {
+    const result = await client.mutate({
+        variables: { input: {
+            car_id: values.car_id,
+            description: values.description,
+            date: values.date,
+            cost: parseInt(values.cost),
+            progress: values.progress,
+            technician: values.technician
+        }},
+        mutation:gql`
+            mutation NewRepairInput($input: RepairInput){
+                createRepair(input: $input) {
+                    _id
+                    car {
+                        _id
+                        make
+                        model
+                        year
+                        rating
+                    }
+                    date
+                    description
+                    cost 
+                    progress
+                    technician
+                }
+            }
+        `
     });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-        throw Error(body) 
-    }
-    return body;
+    return result.data.createRepair;
 }

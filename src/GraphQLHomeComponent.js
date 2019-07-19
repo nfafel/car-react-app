@@ -1,25 +1,20 @@
 import React, {Component} from 'react';
 import './App.css';
 
-const queryFunctions = require('./queryFuncForRepairsComponent')
+const queryFunctions = require('./graphQLQueriesForRepairs')
 
 class HomeComponent extends Component {
     constructor(props){
         super(props);
         this.state = {
-            repairs: null,
-            cars: null
+            repairs: null
         }
     }
     
     componentDidMount() {
         queryFunctions.getRepairsData()
-            .then(res => this.setState({ repairs: res.repairs }))
+            .then(res => this.setState({ repairs: res }))
             .catch(err => console.log(err)); 
-            
-        queryFunctions.getCarsData()
-            .then(res => this.setState({ cars: res.cars }))
-            .catch(err => console.log(err));
     }
 
     tableStyles = {
@@ -34,14 +29,6 @@ class HomeComponent extends Component {
         "border": "1px solid #dddddd"
     };
 
-    getCarForRepair = (carId) => {
-        for (var i = 0; i<this.state.cars.length; i++) {
-            if (this.state.cars[i]._id === carId) {
-                return this.state.cars[i];
-            }
-        }
-    }
-
     reverseRepairsDisplay = (repairsDisplay) => {
         var reversedRepairsDisplay = [];
         for (var i=repairsDisplay.length-1; i>=0; i--) {
@@ -52,25 +39,23 @@ class HomeComponent extends Component {
 
     getRepairsDisplay = () => {
         var repairsDisplay = [];
-        if (this.state.cars != null) {
-            var numRepairs = this.state.repairs.length;
-            for (var i=numRepairs-1; i>=0; i--) {
-                var repair = this.state.repairs[i];
-                var carRepaired = this.getCarForRepair(repair.car_id);
-                if (numRepairs <= 5 || i >= numRepairs-5) {
-                    repairsDisplay.push(
-                        <tr style={this.rowColStyles}>
-                            <td>{carRepaired.year} {carRepaired.make} {carRepaired.model}</td>
-                            <td>{repair.date.split('T', 1)}</td>
-                            <td>{repair.description}</td>
-                            <td>${repair.cost}</td>
-                            <td>{repair.progress}</td>
-                            <td>{repair.technician}</td>
-                        </tr>
-                    )
-                }
+        var numRepairs = this.state.repairs.length;
+        for (var i=numRepairs-1; i>=0; i--) {
+            var repair = this.state.repairs[i];
+            if (numRepairs <= 5 || i >= numRepairs-5) {
+                repairsDisplay.push(
+                    <tr style={this.rowColStyles}>
+                        <td>{repair.car.year} {repair.car.make} {repair.car.model}</td>
+                        <td>{repair.date.split('T', 1)}</td>
+                        <td>{repair.description}</td>
+                        <td>${repair.cost}</td>
+                        <td>{repair.progress}</td>
+                        <td>{repair.technician}</td>
+                    </tr>
+                )
             }
         }
+    
         return repairsDisplay;
     }
     
