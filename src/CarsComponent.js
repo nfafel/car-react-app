@@ -22,7 +22,7 @@ class CarsComponent extends Component {
             repairCarModel: null,
             repairCarYear: null
         }
-    } 
+    }
 
     queryFunctions = require(`${this.props.queryFuncFile}`)
 
