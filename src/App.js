@@ -10,7 +10,7 @@ import GraphQLHomeComponent from './GraphQLHomeComponent'
 function RestHome() {
   return (
     <div>
-      <h2>Last Logged Repairs</h2>
+      <h2>Last Logged Repairs - REST</h2>
       <HomeComponent />
     </div>
   )
@@ -19,8 +19,8 @@ function RestHome() {
 function RestCars() {
   return (
     <div>
-      <h2>Cars</h2>
-      <CarsComponent queryFuncFile={"./queryFuncForCarsComponent"} />
+      <h2>Cars - REST</h2>
+      <CarsComponent queryFuncFile={"rest"} />
     </div>
   );
 }
@@ -28,7 +28,7 @@ function RestCars() {
 function RestRepairs() {
   return (
     <div>
-      <h2>Repairs</h2>
+      <h2>Repairs - REST</h2>
       <RepairsComponent />
     </div>
   );
@@ -37,7 +37,7 @@ function RestRepairs() {
 function GraphQLHome() {
   return (
     <div>
-      <h2>Last Logged Repairs</h2>
+      <h2>Last Logged Repairs - GraphQL</h2>
       <GraphQLHomeComponent />
     </div>
   )
@@ -46,8 +46,8 @@ function GraphQLHome() {
 function GraphQLCars() {
   return (
     <div>
-      <h2>Cars</h2>
-      <CarsComponent queryFuncFile={"./graphQLQueriesForCars"} />
+      <h2>Cars - GraphQL</h2>
+      <CarsComponent queryFuncFile={"graphql"} />
     </div>
   );
 }
@@ -55,7 +55,7 @@ function GraphQLCars() {
 function GraphQLRepairs() {
   return (
     <div>
-      <h2>Repairs</h2>
+      <h2>Repairs - GraphQL</h2>
       <GraphQLRepairsComponent />
     </div>
   );
@@ -154,7 +154,7 @@ class App extends Component {
           <p style={{"margin":"0em"}}>{versionText}</p>
         </header>
         <div style={{"float": "right", "margin": 5}}>
-          <button type="button" style={{fontSize: 15, marginRight: 5, backgroundColor: restButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "rest"})}>Rest</button>
+          <button type="button" style={{fontSize: 15, marginRight: 5, backgroundColor: restButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "rest"})}>REST</button>
           <button type="button" style={{fontSize: 15, backgroundColor: graphQLButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "graphql"})}>GraphQL</button>
         </div>
         <AppRouter queryType={this.state.queryType} />

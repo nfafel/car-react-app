@@ -5,8 +5,8 @@ import * as Yup from 'yup'
 import RepairsByCarComponent from './RepairsByCarComponent'
 import CarFormComponent from './CarFormComponent'
 
-//const queryFunctions = require('./queryFuncForCarsComponent')
-//const queryFunctions = require('./graphQLQueriesForCars')
+const restQueryFunctions = require('./queryFuncForCarsComponent');
+const graphQLQueryFunctions = require('./graphQLQueriesForCars');
 
 class CarsComponent extends Component {
     constructor(props) {
@@ -22,9 +22,8 @@ class CarsComponent extends Component {
             repairCarModel: null,
             repairCarYear: null
         }
+        this.queryFunctions = (this.props.queryFuncType == "rest") ? restQueryFunctions : graphQLQueryFunctions;
     }
-
-    queryFunctions = require(`${this.props.queryFuncFile}`)
 
     componentDidMount() {
         this.queryFunctions.getCarsData()
@@ -202,14 +201,14 @@ class CarsComponent extends Component {
                 {({setValues, values, resetForm, submitForm, setFieldValue}) => (
                 <Form>
                     <table style={this.tableStyles}>
-                    <tr style={this.rowColStyles}>
-                        <th>Year</th>
-                        <th>Make</th>
-                        <th>Model</th>
-                        <th>Rating</th>
-                        <th>Actions</th>
-                    </tr>
-                    {this.getCarsDisplay(setValues, values, submitForm, setFieldValue)}
+                        <tr style={this.rowColStyles}>
+                            <th>Year</th>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
+                        {this.getCarsDisplay(setValues, values, submitForm, setFieldValue)}
                     </table>
                     {this.getNewCarButton(resetForm)}
                 </Form>
