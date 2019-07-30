@@ -10,8 +10,6 @@ class CarFormComponent extends Component {
         yearsRange: null, 
         allMakes: null,
         allModels: null,
-        newCarYear: null,
-        newCarMake: null
       }
     }
 
@@ -19,6 +17,16 @@ class CarFormComponent extends Component {
         queryFunctions.getAllCarYears()
             .then(res => this.setState({ yearsRange: res }))
             .catch(err => alert(err));
+
+        if (this.props.values.year !== "") {
+            queryFunctions.getAllCarMakes(this.props.values.year)
+                .then(res => this.setState({ allMakes: res }))
+                .catch(err => alert(err));
+
+            queryFunctions.getAllCarModels(this.props.values.make, this.props.values.year)
+                .then(res => this.setState({ allModels: res }))
+                .catch(err => alert(err));
+        }
     }
 
     getYearOptions = () => {
@@ -33,19 +41,9 @@ class CarFormComponent extends Component {
         return allYears;
     }
 
-    getMakeOptions = (values, setFieldValue) => {
+    getMakeOptions = (values) => {
         if (values.year === "") {
-            return [<option value="" selected>Select a Make</option>, <option value="">Select a Year to see Car Makes</option>]
-        }
-
-        if (this.state.newCarYear !== values.year) {
-            if (!this.props.shouldGetPutData) {
-                setFieldValue('make', "");
-            }
-            this.setState( {newCarYear: values.year} );
-            queryFunctions.getAllCarMakes(values.year)
-                .then(res => this.setState({ allMakes: res }))
-                .catch(err => alert(err)); 
+            return [<option value="">No Year Chosen</option>]
         }
 
         if (this.state.allMakes == null ) {
@@ -60,21 +58,9 @@ class CarFormComponent extends Component {
         return allMakes;
     }
 
-    getModelOptions = (values, setFieldValue) => {
+    getModelOptions = (values) => {
         if (values.make === "") {
-            return [<option value="">Select a Model</option>, <option value="">Select a Make to see Car Models</option>]
-        }
-
-        if (this.state.newCarMake !== values.make) {
-            if (!this.props.shouldGetPutData) {
-                setFieldValue('model', "");
-            }
-            this.setState( {newCarMake: values.make} );
-            
-            queryFunctions.getAllCarModels(values.make, values.year)
-                .then(res => this.setState({ allModels: res }))
-                .catch(err => alert(err));
-
+            return [<option value="">No Make Chosen</option>]
         }
 
         if (this.state.allModels == null) {
@@ -89,24 +75,56 @@ class CarFormComponent extends Component {
         return allModels;
     }
 
+    async handleYearChange(event) {
+        const selectedYear = event.target.value;
+
+        if (selectedYear !== "") {
+            queryFunctions.getAllCarMakes(selectedYear)
+                .then(res => this.setState({ allMakes: res }))
+                .catch(err => alert(err));
+        }
+
+        await this.props.setFieldValue('model', "");
+        await this.props.setFieldValue('make', "");
+        await this.props.setFieldValue('year', selectedYear);
+    }
+
+    async handleMakeChange(event) {
+        const selectedMake = event.target.value;
+
+        if (selectedMake !== "") {
+            queryFunctions.getAllCarModels(selectedMake, this.props.values.year)
+                .then(res => this.setState({ allModels: res }))
+                .catch(err => alert(err));
+        }
+
+        await this.props.setFieldValue('model', "");
+        await this.props.setFieldValue('make', selectedMake);
+    }
+
+    async handleModelChange(event) {
+        const selectedModel = event.target.value;
+        this.props.setFieldValue('model', selectedModel);
+    }
+    
     render() {
         
         return (
             <tr>
                 <td>
-                    <Field component="select" name="year" placeHolder="Year" >
+                    <Field onChange={(e) => this.handleYearChange(e)} component="select" name="year" placeHolder="Year" >
                         {this.getYearOptions()}
                     </Field>
                     <ErrorMessage name="year" />
                 </td>
                 <td>
-                    <Field component="select" name="make" placeHolder="Make" >
+                    <Field onChange={(e) => this.handleMakeChange(e)} component="select" name="make" placeHolder="Make" >
                         {this.getMakeOptions(this.props.values, this.props.setFieldValue)}
                     </Field>
                     <ErrorMessage name="make" />
                 </td>
                 <td>
-                    <Field component="select" name="model" placeHolder="Model" >
+                    <Field onChange={(e) => this.handleModelChange(e)} component="select" name="model" placeHolder="Model" >
                         {this.getModelOptions(this.props.values, this.props.setFieldValue)}
                     </Field>
                     <ErrorMessage name="model" />
