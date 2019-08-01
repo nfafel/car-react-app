@@ -22,7 +22,7 @@ class CarsComponent extends Component {
             repairCarModel: null,
             repairCarYear: null
         }
-        this.queryFunctions = (this.props.queryFuncType == "rest") ? restQueryFunctions : graphQLQueryFunctions;
+        this.queryFunctions = (this.props.queryFuncType === "rest") ? restQueryFunctions : graphQLQueryFunctions;
     }
 
     componentDidMount() {

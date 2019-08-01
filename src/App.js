@@ -6,6 +6,7 @@ import RepairsComponent from './RepairsComponent'
 import HomeComponent from './HomeComponent'
 import GraphQLRepairsComponent from './GraphQLRepairsComponent'
 import GraphQLHomeComponent from './GraphQLHomeComponent'
+import SubscriptionComponent from './SubscriptionComponent'
 
 function RestHome() {
   return (
@@ -66,7 +67,7 @@ class AppRouter extends Component {
     var HomeComponent;
     var CarsComponent;
     var RepairsComponent;
-    if (this.props.queryType == "rest") {
+    if (this.props.queryType === "rest") {
       HomeComponent = RestHome;
       CarsComponent = RestCars
       RepairsComponent = RestRepairs
@@ -107,7 +108,7 @@ class App extends Component {
     super(props);
     this.state = {
       version: null,
-      queryType: "rest"
+      queryType: "rest",
     }
   }
 
@@ -158,6 +159,7 @@ class App extends Component {
           <button type="button" style={{fontSize: 15, backgroundColor: graphQLButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "graphql"})}>GraphQL</button>
         </div>
         <AppRouter queryType={this.state.queryType} />
+        <SubscriptionComponent queryType={this.state.queryType} />
       </div>
     );
   }
