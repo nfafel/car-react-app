@@ -133,10 +133,11 @@ class SubscriptionComponent extends Component {
                     >
                     {(props) => (
                         <Form>
-                            <p>Enter the Confirmation Number Sent to </p>
+                            <p>Enter the Confirmation Number Sent to {this.state.phoneNumber}</p>
                             <Field type="number" name="enteredConfirmationNumber" placeholder=""/>
                             <ErrorMessage name="enteredConfirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
                             <div style={{"margin": 15}}>
+                                <button type="button" onClick={() => this.setState({SMSConfirmationForm: "closed", phoneNumber: null, confirmationNumber: null})}>Cancel</button>
                                 <button type="submit">Confirm</button>
                             </div>
                         </Form>

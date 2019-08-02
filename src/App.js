@@ -12,7 +12,7 @@ function RestHome() {
   return (
     <div>
       <h2>Last Logged Repairs - REST</h2>
-      <HomeComponent />
+      <HomeComponent/>
     </div>
   )
 }
@@ -21,7 +21,7 @@ function RestCars() {
   return (
     <div>
       <h2>Cars - REST</h2>
-      <CarsComponent queryFuncFile={"rest"} />
+      <CarsComponent queryFuncType={"rest"} />
     </div>
   );
 }
@@ -48,7 +48,7 @@ function GraphQLCars() {
   return (
     <div>
       <h2>Cars - GraphQL</h2>
-      <CarsComponent queryFuncFile={"graphql"} />
+      <CarsComponent queryFuncType={"graphql"} />
     </div>
   );
 }
@@ -103,7 +103,6 @@ class AppRouter extends Component {
 }
 
 class App extends Component {
-
   constructor(props){
     super(props);
     this.state = {
@@ -116,7 +115,6 @@ class App extends Component {
     this.getVersionData()
       .then(res => this.setState({ version: res.version }))
       .catch(err => console.log(err));
-
   }
 
   getVersionData = async() => {

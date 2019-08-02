@@ -25,13 +25,16 @@ class CarsComponent extends Component {
         this.queryFunctions = (this.props.queryFuncType === "rest") ? restQueryFunctions : graphQLQueryFunctions;
     }
 
-    componentDidMount() {
-        this.queryFunctions.getCarsData()
-            .then(res => this.setState({ cars: res }))
-            .catch(err => console.log(err));
+    async componentDidMount() {
+        try {
+            const cars = await this.queryFunctions.getCarsData();
+            this.setState( {cars: cars} )
+        } catch(err) {
+            console.log(err)
+        }
     }
-  
-    callDeleteData(carId) {
+
+    callDeleteData(carId, carMake, carModel, carYear) {
         this.queryFunctions.deleteData(carId)
             .then(res => this.setState({cars: res}))
             .catch(err => console.log(err));
@@ -39,6 +42,13 @@ class CarsComponent extends Component {
         if (this.state.repairCarId === carId) {
             this.setState( {repairsForCar: null} );
         }
+        var values = {
+            make: carMake,
+            model: carModel,
+            year: carYear
+        }
+        this.queryFunctions.notifyCarChange("delete", values)
+            .catch(err => console.log(err))
     }
   
     getPutData(car, setValues) {
@@ -62,6 +72,9 @@ class CarsComponent extends Component {
                 carIdUpdate: null
             }))
             .catch(err => console.log(err));
+
+        this.queryFunctions.notifyCarChange("update", values)
+            .catch(err => console.log(err))
     }
   
     getPostData(resetForm) {
@@ -82,6 +95,9 @@ class CarsComponent extends Component {
                 carIdUpdate: null,
             }))
             .catch(err => alert(err));
+
+        this.queryFunctions.notifyCarChange("create", values)
+            .catch(err => console.log(err))
     }
 
     setRepairsForCar = (repairCarId, repairCarMake, repairCarModel, repairCarYear) => {
@@ -147,7 +163,7 @@ class CarsComponent extends Component {
                     <td>
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.setRepairsForCar(car._id, car.make, car.model, car.year)} >SEE REPAIRS</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id)}>DELETE</button> 
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id, car.make, car.model, car.year)}>DELETE</button> 
                     </td>
                 </tr>)
             }

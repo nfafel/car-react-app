@@ -27,7 +27,7 @@ class RepairsComponent extends Component {
         mergedRepairs: null,
         shouldGetPostData: false,
         shouldGetPutData: false,
-        repairIdUpdate: null
+        repairUpdated: null
       }
     }
     
@@ -41,9 +41,10 @@ class RepairsComponent extends Component {
 
             var mergedRepairData = [];
             for (var i=0; i< repairs.length; i++) {
-                var carForRepair = this.getCarForRepair(cars, repairs[i].car_id);
+                var carForRepair = this.getCarForRepair(repairs[i].car_id, cars);
                 mergedRepairData.push(new RepairWithCar(carForRepair, repairs[i]))
             }
+
             this.setState({
                 mergedRepairs: mergedRepairData, 
                 cars:cars
@@ -54,7 +55,7 @@ class RepairsComponent extends Component {
         }
     }
 
-    getCarForRepair = (allCars, carId) => {
+    getCarForRepair = (carId, allCars) => {
         for (var i = 0; i<allCars.length; i++) {
             if (allCars[i]._id === carId) {
                 return allCars[i];
@@ -62,12 +63,12 @@ class RepairsComponent extends Component {
         }
     }
     
-    callDeleteData(repairId) {
-        queryFunctions.deleteData(repairId)
+    callDeleteData(repair) {
+        queryFunctions.deleteData(repair._id)
             .then(res => {
                 var mergedRepairData = [];
                 for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
                     mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
                 }
                 this.setState({
@@ -75,12 +76,16 @@ class RepairsComponent extends Component {
                 });
             })
             .catch(err => console.log(err));
+        
+        var car = this.getCarForRepair(repair.car._id, this.state.cars);
+        queryFunctions.notifyRepairChange("delete", repair, car)
+            .catch(err => alert(err))
     }
   
     getPutData(repair, setValues) {
         this.setState({
             shouldGetPutData: true,
-            repairIdUpdate: repair._id
+            repairUpdated: repair
         });
         setValues({
             car_id: repair.car._id,
@@ -92,21 +97,25 @@ class RepairsComponent extends Component {
         });
     }
   
-    callPutData(repairId, values) {
-        queryFunctions.putData(repairId, values)
+    callPutData(repair, values) {
+        queryFunctions.putData(repair._id, values)
             .then(res => {
                 var mergedRepairData = [];
                 for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
                     mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
                 }
                 this.setState({
                     mergedRepairs: mergedRepairData, 
                     shouldGetPutData: false,
-                    repairIdUpdate: null
+                    repairUpdated: null
                 });
             })
             .catch(err => alert(err));
+
+        var car = this.getCarForRepair(values.car_id, this.state.cars);
+        queryFunctions.notifyRepairChange("update", values, car)
+            .catch(err => console.log(err))
     }
   
     getPostData(resetForm) {
@@ -126,7 +135,7 @@ class RepairsComponent extends Component {
             .then(res => {
                 var mergedRepairData = [];
                 for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(this.state.cars, res.repairs[i].car_id);
+                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
                     mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
                 }
                 this.setState({
@@ -135,6 +144,10 @@ class RepairsComponent extends Component {
                 });
             })
             .catch(err => console.log(err));
+
+        var car = this.getCarForRepair(values.car_id, this.state.cars);
+        queryFunctions.notifyRepairChange("create", values, car)
+            .catch(err => console.log(err))
     }
   
     tableStyles() {
@@ -155,7 +168,7 @@ class RepairsComponent extends Component {
 
     getRepairsDisplay = (setValues, values) => {
         var repairsDisplay = this.state.mergedRepairs.map((repair) => { 
-            if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
+            if (this.state.shouldGetPutData && repair._id === this.state.repairUpdated._id) {
                 return (<RepairFormComponent cars={this.state.cars} values={values} formType={"update"} cancel={() => this.setState({shouldGetPutData: false})} /> );
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
@@ -179,7 +192,7 @@ class RepairsComponent extends Component {
                     <td>{repair.technician}</td>
                     <td>
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair)}>DELETE</button> 
                     </td>
                 </tr>)
             }
@@ -194,7 +207,7 @@ class RepairsComponent extends Component {
       if (this.state.shouldGetPostData) {
         this.callPostData(values);
       } else {
-        this.callPutData(this.state.repairIdUpdate, values);
+        this.callPutData(this.state.repairUpdated, values);
       }
     }
   
