@@ -10,45 +10,59 @@ class CarsComponent extends Component {
             usernameForm: "open",
             passwordForm: "closed",
             confirmationNumber: null,
-            phoneNumber: null,
+            user: null,
             incorrectGuesses: 0
         }
     }
 
-    checkIfRegistered = (phoneNumber) => { //async await
-        //check if the phone number given is in the database
-        this.validateUsername(phoneNumber);
+    checkIfRegistered = async(phoneNumber) => { 
+        var parsedNumber = phoneNumber.replace(/-|\(|\)/g, "");
+
+        var body;
+        try{
+            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/1${parsedNumber}`)
+            body = await userResponse.json();
+        } catch(err) {
+            console.log(err)
+        }
+
+        if(body.user == null) {
+            alert("The phone number you entered is not a registered number. Please sign up for a new account.")
+        } else {
+            this.validateUsername(body.user);
+        }
     }
 
-    validateUsername = async(phoneNumber) => {
-        var parsedNumber = phoneNumber.replace(/-|\(|\)/g, "");
+    validateUsername = async(user) => {
         var confirmationNumber = Math.floor(Math.random() * 900000) + 100000;
-
-        const user = await fetch(`https://tranquil-caverns-41069.herokuapp.com/user/password/1${parsedNumber}`)
         this.setState({
-            phoneNumber: parsedNumber,
             usernameForm: "closed",
             passwordForm: "open",
             confirmationNumber: confirmationNumber,
-            password: user.password
+            user: user
         })
-        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/sendConfirmation/1${parsedNumber}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                confirmationNumber: confirmationNumber.toString()
-            })
-        });
+
+        try{
+            fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/sendConfirmation/${user.phoneNumber}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    confirmationNumber: confirmationNumber.toString()
+                })
+            });
+        } catch(err) {
+            console.log(err)
+        }
     }
 
     attemptLogin = (values) => {
         var correctConfirmationNum = (values.enteredConfirmationNumber === this.state.confirmationNumber);
-        var correctPassword = (values.password === this.state.password);
+        var correctPassword = (values.password === this.state.user.password);
         if (correctConfirmationNum && correctPassword) {
-            this.props.setUser(this.state.phoneNumber)
+            this.props.setUser(this.state.user)
         } else {
             if (this.state.incorrectGuesses < 2) {
                 alert("The confirmation number or password you provided is incorrect. Please try again.")
@@ -79,6 +93,31 @@ class CarsComponent extends Component {
             .required('Required')
     })
 
+    smsButtonStyle = {
+        "border": "none", 
+        "background":"none", 
+        "color":"blue", 
+        "outline":"none"
+    }
+
+    testtest = async(phoneNumber) => {
+        var parsedNumber = phoneNumber.replace(/-|\(|\)/g, "");
+        var body;
+        try{
+            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/1${parsedNumber}`)
+            body = await userResponse.json();
+        } catch(err) {
+            console.log(err)
+        }
+        this.props.setUser(body.user)
+    }
+
+    formStyle = { 
+        "border": "solid", 
+        "backgroundColor": "#cdf6f7", 
+        "width": 400
+    }
+
     render() {
         var LoginForm;
         if (this.state.usernameForm === "open") {
@@ -86,10 +125,11 @@ class CarsComponent extends Component {
                 <Formik
                     initialValues = {{phoneNumber: ''}}
                     validationSchema={this.UsernameValidationSchema}
-                    onSubmit = {(values) => this.checkIfRegistered(values.phoneNumber)}
+                    //onSubmit = {(values) => this.checkIfRegistered(values.phoneNumber)}
+                    onSubmit = {(values) => this.testtest(values.phoneNumber)}
                 >
                 {(props) => (
-                    <Form style={{border: '0.2vh solid grey', width: "400px"}} >
+                    <Form style={this.formStyle} >
                         <p>Login</p>
                         <Field type="tel" name="phoneNumber" placeholder="Phone Number"/>
                         <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
@@ -108,10 +148,10 @@ class CarsComponent extends Component {
                     onSubmit = {(values) => this.attemptLogin(values)}
                 >
                 {(props) => (
-                    <Form style={{border: '0.2vh solid grey', width: "400px"}} >
+                    <Form style={this.formStyle} >
                         <p>Enter Password and Confirmation Number:</p>
                         <div>
-                            <Field type="text" name="password" placeholder="Password"/>
+                            <Field type="password" name="password" placeholder="Password"/>
                             <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
                         </div>
                         <div style={{marginTop: '5px'}}>
@@ -119,7 +159,7 @@ class CarsComponent extends Component {
                             <ErrorMessage name="enteredConfirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
                         </div>
                         <div style={{"margin": 15}}>
-                            <button type="button" style={{backgroundColor: '#d0d5db', margin: '5px'}} onClick={() => this.setState({SMSSubscriptionForm: "closed"})}>Close</button>
+                            <button type="button" style={{backgroundColor: '#d0d5db', margin: '5px'}} onClick={() => this.setState({passwordForm: "closed"})}>Close</button>
                             <button type="submit" style={{backgroundColor: '#d0d5db', margin: '5px'}}>Login</button>
                         </div>
                     </Form>
@@ -129,8 +169,9 @@ class CarsComponent extends Component {
         } 
 
         return (
-            <div style={{height: '70vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+            <div>
                 {LoginForm}
+                <button type="button" style={this.smsButtonStyle} onClick={() => this.props.createAccount()}>Create an Account</button>
             </div>
         )
     }

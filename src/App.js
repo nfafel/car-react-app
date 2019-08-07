@@ -8,6 +8,7 @@ import GraphQLRepairsComponent from './GraphQLRepairsComponent'
 import GraphQLHomeComponent from './GraphQLHomeComponent'
 import SubscriptionComponent from './SubscriptionComponent'
 import LoginComponent from './LoginComponent'
+import RegistrationComponent from './RegistrationComponent'
 
 function RestHome() {
   return (
@@ -109,7 +110,8 @@ class App extends Component {
     this.state = {
       version: null,
       queryType: "rest",
-      user: null
+      user: null,
+      newAccountForm: "closed"
     }
   }
 
@@ -151,7 +153,7 @@ class App extends Component {
     return(
       <div className="App" >
         <header className="App-header">
-          <h1 className="App-title" style={{"margin":"0em"}}>Car Repair Editor</h1>
+          <h1 className="App-title" style={{"margin":"0em"}}>Car Repair App</h1>
           <p style={{"margin":"0em"}}>{versionText}</p>
         </header>
         <div style={{float: "right", margin: 5}}>
@@ -159,23 +161,21 @@ class App extends Component {
           <button type="button" style={{fontSize: 15, backgroundColor: graphQLButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "graphql"})}>GraphQL</button>
         </div>
         {(this.state.user === null) ? 
-          (<div>
-            <LoginComponent setUser={(user) => {this.setState({user: user})}} />
+          (<div style={{height: '70vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+            {(this.state.newAccountForm === "closed") ? 
+            (<LoginComponent setUser={(user) => {this.setState({user: user})}} createAccount={() => this.setState({newAccountForm: "open"})} />) 
+            : 
+            (<RegistrationComponent setUser={(user) => {this.setState({user: user})}} cancel={() => this.setState({newAccountForm: "closed"})} />)} 
           </div>) 
           : 
           (<div>
-            <AuthorizedAppRouter queryType={this.state.queryType} />
-            <SubscriptionComponent queryType={this.state.queryType} />
+            <AuthorizedAppRouter queryType={this.state.queryType} user={this.state.user} />
+            <SubscriptionComponent queryType={this.state.queryType} user={this.state.user} />
           </div>)
-          }
+        }
       </div>
     );
   }
 }
 
 export default App;
-
-//<AuthorizedAppRouter queryType={this.state.queryType} />
-//<SubscriptionComponent queryType={this.state.queryType} />
-
-
