@@ -20,7 +20,7 @@ class SubscriptionComponent extends Component {
     changeSubscription = async() => {
         this.setState({subscribed: !this.state.subscribed})
         try {
-            await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.props.user.phoneNumber}/changeSubscription`, {
+            const newUserResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.props.user.phoneNumber}/changeSubscription`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -30,6 +30,8 @@ class SubscriptionComponent extends Component {
                     subscribed: !this.state.subscribed
                 })
             });
+            const body = await newUserResponse.json();
+            this.props.setUser(body.user)
         } catch(err) {
             console.log(err)
         }

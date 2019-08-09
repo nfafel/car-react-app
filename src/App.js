@@ -1,108 +1,13 @@
 import React, {Component} from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import CarsComponent from './CarsComponent'
-import RepairsComponent from './RepairsComponent'
-import HomeComponent from './HomeComponent'
-import GraphQLRepairsComponent from './GraphQLRepairsComponent'
-import GraphQLHomeComponent from './GraphQLHomeComponent'
+
+import { Provider } from "react-redux";
+import store from './ReduxState'
+
+import AuthorizedAppRouter from './AuthorizedAppRouter'
 import SubscriptionComponent from './SubscriptionComponent'
 import LoginComponent from './LoginComponent'
 import RegistrationComponent from './RegistrationComponent'
-
-function RestHome() {
-  return (
-    <div>
-      <h2>Last Logged Repairs - REST</h2>
-      <HomeComponent/>
-    </div>
-  )
-}
-
-function RestCars() {
-  return (
-    <div>
-      <h2>Cars - REST</h2>
-      <CarsComponent queryFuncType={"rest"} />
-    </div>
-  );
-}
-
-function RestRepairs() {
-  return (
-    <div>
-      <h2>Repairs - REST</h2>
-      <RepairsComponent />
-    </div>
-  );
-}
-
-function GraphQLHome() {
-  return (
-    <div>
-      <h2>Last Logged Repairs - GraphQL</h2>
-      <GraphQLHomeComponent />
-    </div>
-  )
-}
-
-function GraphQLCars() {
-  return (
-    <div>
-      <h2>Cars - GraphQL</h2>
-      <CarsComponent queryFuncType={"graphql"} />
-    </div>
-  );
-}
-
-function GraphQLRepairs() {
-  return (
-    <div>
-      <h2>Repairs - GraphQL</h2>
-      <GraphQLRepairsComponent />
-    </div>
-  );
-}
-
-class AuthorizedAppRouter extends Component {
-  render () {
-    var HomeComponent;
-    var CarsComponent;
-    var RepairsComponent;
-    if (this.props.queryType === "rest") {
-      HomeComponent = RestHome;
-      CarsComponent = RestCars
-      RepairsComponent = RestRepairs
-    } else {
-      HomeComponent = GraphQLHome;
-      CarsComponent = GraphQLCars
-      RepairsComponent = GraphQLRepairs
-    }
-
-    return (
-      <Router>
-        <div>
-          <nav>
-            <table style={{"width":'30%'}}>
-              <tr>
-                <th><Link to="/">Home</Link></th>
-                
-                <th><Link to="/cars/">Cars</Link></th>
-                
-                <th><Link to="/repairs/">Repairs</Link></th>
-                
-              </tr>
-            </table>
-          </nav>
-
-          <Route path="/" exact component={HomeComponent} />
-          <Route path="/cars/" component={CarsComponent} />
-          <Route path="/repairs/" component={RepairsComponent} />
-        </div>
-      </Router>
-    );
-  }
-}
 
 class App extends Component {
   constructor(props){
@@ -132,7 +37,6 @@ class App extends Component {
   };
 
   render() {
-
     var versionText;
     if (this.state.version == null) {
         versionText = "Loading ...";
@@ -151,29 +55,32 @@ class App extends Component {
     }
 
     return(
-      <div className="App" >
-        <header className="App-header">
-          <h1 className="App-title" style={{"margin":"0em"}}>Car Repair App</h1>
-          <p style={{"margin":"0em"}}>{versionText}</p>
-        </header>
-        <div style={{float: "right", margin: 5}}>
-          <button type="button" style={{fontSize: 15, marginRight: 5, backgroundColor: restButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "rest"})}>REST</button>
-          <button type="button" style={{fontSize: 15, backgroundColor: graphQLButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "graphql"})}>GraphQL</button>
-        </div>
-        {(this.state.user === null) ? 
-          (<div style={{height: '70vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-            {(this.state.newAccountForm === "closed") ? 
-            (<LoginComponent setUser={(user) => {this.setState({user: user})}} createAccount={() => this.setState({newAccountForm: "open"})} />) 
+      <Provider store={store}>
+        <div className="App" >
+          <header className="App-header">
+            <h1 className="App-title" style={{"margin":"0em"}}>Car Repair App</h1>
+            <p style={{"margin":"0em"}}>{versionText}</p>
+            <p>{store.getState()}</p>
+          </header>
+          <div style={{float: "right", margin: 5}}>
+            <button type="button" style={{fontSize: 15, marginRight: 5, backgroundColor: restButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "rest"})}>REST</button>
+            <button type="button" style={{fontSize: 15, backgroundColor: graphQLButtonColor, outline: "none"}} onClick={() => this.setState({queryType: "graphql"})}>GraphQL</button>
+          </div>
+          {(this.state.user === null) ? 
+            (<div style={{height: '70vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+              {(this.state.newAccountForm === "closed") ? 
+              (<LoginComponent setUser={(user) => {this.setState({user: user})}} createAccount={() => this.setState({newAccountForm: "open"})} />) 
+              : 
+              (<RegistrationComponent setUser={(user) => {this.setState({user: user})}} cancel={() => this.setState({newAccountForm: "closed"})} />)} 
+            </div>) 
             : 
-            (<RegistrationComponent setUser={(user) => {this.setState({user: user})}} cancel={() => this.setState({newAccountForm: "closed"})} />)} 
-          </div>) 
-          : 
-          (<div>
-            <AuthorizedAppRouter queryType={this.state.queryType} user={this.state.user} />
-            <SubscriptionComponent queryType={this.state.queryType} user={this.state.user} />
-          </div>)
-        }
-      </div>
+            (<div>
+              <AuthorizedAppRouter queryType={this.state.queryType} user={this.state.user} />
+              <SubscriptionComponent queryType={this.state.queryType} user={this.state.user} setUser={(user) => this.setState({user: user})} />
+            </div>)
+          }
+        </div>
+      </Provider>
     );
   }
 }

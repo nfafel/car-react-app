@@ -1,5 +1,5 @@
-exports.getCarsData = async() => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars');
+exports.getCarsData = async(phoneNumber) => {
+    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${phoneNumber}`);
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -17,10 +17,10 @@ exports.deleteData = async(carId) => {
   if (response.status !== 200) {
       throw Error(body) 
   }
-  return body.cars;
+  return body.carId;
 }
 
-exports.putData = async(carId, values) => {
+exports.putData = async(carId, values, phoneNumber) => {
     const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars/${carId}`, {
       method: 'PUT',
       headers: {
@@ -28,6 +28,7 @@ exports.putData = async(carId, values) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        phoneNumber: phoneNumber,
         make: values.make,
         model: values.model,
         year: values.year,
@@ -39,17 +40,18 @@ exports.putData = async(carId, values) => {
     if (response.status !== 200) {
       throw Error(body) 
     }
-    return body.cars;
+    return body.car;
 }
 
-exports.postData = async(values) => {
-    const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars', {
+exports.postData = async(values, phoneNumber) => {
+    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        phoneNumber: phoneNumber,
         make: values.make,
         model: values.model,
         year: values.year,
@@ -61,7 +63,7 @@ exports.postData = async(values) => {
     if (response.status !== 200) {
       throw Error(body) 
     }
-    return body.cars;
+    return body.car;
 }
 
 exports.getRepairsForCar = async(repairsForCarId) => {
@@ -77,11 +79,11 @@ exports.getRepairsForCar = async(repairsForCarId) => {
 exports.getAllCarYears = async() => {
   const response = await fetch('https://tranquil-caverns-41069.herokuapp.com/cars/years');
   const body = await response.json();
-
+  
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body.Years;
+  return body;
 };
 
 exports.getAllCarMakes = async(year) => {
@@ -91,7 +93,7 @@ exports.getAllCarMakes = async(year) => {
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body.Makes;
+  return body;
 };
 
 exports.getAllCarModels = async(make, year) => {
@@ -101,27 +103,22 @@ exports.getAllCarModels = async(make, year) => {
   if (response.status !== 200) {
     throw Error(body) 
   }
-  return body.Models;
+  return body;
 };
 
-exports.notifyCarChange = async(crudType, values) => {
+exports.notifyCarChange = async(crudType, values, phoneNumber) => {
   try {
-    const numbersResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/sms`);
-    const body = await numbersResponse.json();
-    const numbers = body.numbers;
-    numbers.forEach((number) => {
-      fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/notifyCar/+1${number.phoneNumber}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          crudType: crudType,
-          car: `${values.year} ${values.make} ${values.model}`
-        })
-      });
-    })
+    fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/notifyCar/+${phoneNumber}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        crudType: crudType,
+        car: `${values.year} ${values.make} ${values.model}`
+      })
+    });
   } catch(err) {
     alert(err)
   }

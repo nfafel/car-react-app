@@ -33,11 +33,8 @@ class RepairsComponent extends Component {
     
     async componentDidMount() {
         try {
-            const carsResponse = await queryFunctions.getCarsData();
-            const cars = carsResponse.cars;
-
-            const repairsResponse = await queryFunctions.getRepairsData();
-            const repairs = repairsResponse.repairs;
+            const cars = await queryFunctions.getCarsData(this.props.user.phoneNumber);
+            const repairs = await queryFunctions.getRepairsData(this.props.user.phoneNumber);
 
             var mergedRepairData = [];
             for (var i=0; i< repairs.length; i++) {
@@ -63,30 +60,24 @@ class RepairsComponent extends Component {
         }
     }
     
-    callDeleteData(repair) {
-        queryFunctions.deleteData(repair._id)
-            .then(res => {
-                var mergedRepairData = [];
-                for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
-                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
-                }
-                this.setState({
-                    mergedRepairs: mergedRepairData
-                });
-            })
-            .catch(err => console.log(err));
-        
-        var car = this.getCarForRepair(repair.car._id, this.state.cars);
-        queryFunctions.notifyRepairChange("delete", repair, car)
-            .catch(err => alert(err))
+    callDeleteData = async(repair) => {
+        try {
+            const deletedRepairId = await queryFunctions.deleteData(repair._id, this.props.user.phoneNumber);
+            const newMergedRepairs = this.state.mergedRepairs.filter(repair => repair._id !== deletedRepairId);
+
+            this.setState({ mergedRepairs: newMergedRepairs});
+
+            if (this.props.user.subscribed) {
+                var car = this.getCarForRepair(repair.car._id, this.state.cars);
+                queryFunctions.notifyRepairChange("delete", repair, car, this.props.user.phoneNumber)
+            }
+
+        } catch(err) {
+            console.log(err);
+        }   
     }
   
     getPutData(repair, setValues) {
-        this.setState({
-            shouldGetPutData: true,
-            repairUpdated: repair
-        });
         setValues({
             car_id: repair.car._id,
             description: repair.description,
@@ -95,59 +86,73 @@ class RepairsComponent extends Component {
             progress: repair.progress,
             technician: repair.technician
         });
+        this.setState({
+            shouldGetPutData: true,
+            repairUpdated: repair
+        });
     }
   
-    callPutData(repair, values) {
-        queryFunctions.putData(repair._id, values)
-            .then(res => {
-                var mergedRepairData = [];
-                for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
-                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
+    callPutData = async(repair, values) => {
+        try {
+            const updatedRepair = await queryFunctions.putData(repair._id, values, this.props.user.phoneNumber);
+            const carForRepair = this.getCarForRepair(updatedRepair.car_id, this.state.cars)
+            const mergedRepair = new RepairWithCar(carForRepair, updatedRepair);
+            
+            const newMergedRepairs = this.state.mergedRepairs.map((repair) => {
+                if (repair._id === updatedRepair._id) {
+                    return mergedRepair;
+                } else {
+                    return repair;
                 }
-                this.setState({
-                    mergedRepairs: mergedRepairData, 
-                    shouldGetPutData: false,
-                    repairUpdated: null
-                });
             })
-            .catch(err => alert(err));
+            this.setState({
+                mergedRepairs: newMergedRepairs, 
+                shouldGetPutData: false,
+                repairUpdated: null
+            });
 
-        var car = this.getCarForRepair(values.car_id, this.state.cars);
-        queryFunctions.notifyRepairChange("update", values, car)
-            .catch(err => console.log(err))
+            if (this.props.user.subscribed) {
+                var car = this.getCarForRepair(values.car_id, this.state.cars);
+                queryFunctions.notifyRepairChange("update", values, car, this.props.user.phoneNumber)
+            }
+        } catch(err) {
+            console.log(err)
+        }
     }
   
     getPostData(resetForm) {
-      this.setState({shouldGetPostData: true});
-      resetForm({
-        car_id: "",
-        description: "",
-        date: "",
-        cost: "",
-        progress: "",
-        technician: ""
-      })
+        resetForm({
+            car_id: "",
+            description: "",
+            date: "",
+            cost: "",
+            progress: "",
+            technician: ""
+        })
+        this.setState({shouldGetPostData: true});
     }
   
-    callPostData(values) {
-        queryFunctions.postData(values)
-            .then(res => {
-                var mergedRepairData = [];
-                for (var i=0; i< res.repairs.length; i++) {
-                    var carForRepair = this.getCarForRepair(res.repairs[i].car_id, this.state.cars);
-                    mergedRepairData.push(new RepairWithCar(carForRepair, res.repairs[i]))
-                }
-                this.setState({
-                    mergedRepairs: mergedRepairData, 
-                    shouldGetPostData: false
-                });
-            })
-            .catch(err => console.log(err));
+    callPostData = async(values) => {
+        try {
+            const newRepair = await queryFunctions.postData(values, this.props.user.phoneNumber);
+            const carForRepair = this.getCarForRepair(newRepair.car_id, this.state.cars)
+            const mergedRepair = new RepairWithCar(carForRepair, newRepair);
+            
+            const newMergedRepairs = this.state.mergedRepairs;
+            newMergedRepairs.push(mergedRepair);
 
-        var car = this.getCarForRepair(values.car_id, this.state.cars);
-        queryFunctions.notifyRepairChange("create", values, car)
-            .catch(err => console.log(err))
+            this.setState({
+                mergedRepairs: newMergedRepairs, 
+                shouldGetPostData: false
+            });
+
+            if (this.props.user.subscribed) {
+                var car = this.getCarForRepair(values.car_id, this.state.cars);
+                queryFunctions.notifyRepairChange("create", values, car, this.props.user.phoneNumber)
+            }
+        } catch(err) {
+            console.log(err)
+        }
     }
   
     tableStyles() {

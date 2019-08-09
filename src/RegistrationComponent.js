@@ -99,8 +99,8 @@ class RegistrationComponent extends Component {
                 })
             });
             this.props.setUser({
-                phoneNumber: values.phoneNumber,
-                password: this.state.password,
+                phoneNumber: this.state.phoneNumber,
+                password: values.password,
                 subscribed: false
             });
         } else {

@@ -27,89 +27,116 @@ class CarsComponent extends Component {
 
     async componentDidMount() {
         try {
-            const cars = await this.queryFunctions.getCarsData();
+            const cars = await this.queryFunctions.getCarsData(this.props.user.phoneNumber);
             this.setState( {cars: cars} )
         } catch(err) {
             console.log(err)
         }
     }
 
-    callDeleteData(carId, carMake, carModel, carYear) {
-        this.queryFunctions.deleteData(carId)
-            .then(res => this.setState({cars: res}))
-            .catch(err => console.log(err));
-        
-        if (this.state.repairCarId === carId) {
-            this.setState( {repairsForCar: null} );
+    callDeleteData = async(car) => {
+        try {
+            const deletedCarId = await this.queryFunctions.deleteData(car._id);
+            const newCarsData = this.state.cars.filter(car => car._id !== deletedCarId);
+
+            if (this.state.repairCarId === car._id) { //reset the repairs shown for the car if car is deleted
+                this.setState({ 
+                    repairsForCar: null,
+                    cars: newCarsData
+                });
+            } else {
+                this.setState({ cars: newCarsData });
+            }
+
+            if (this.props.user.subscribed) {
+                this.queryFunctions.notifyCarChange("delete", car, this.props.user.phoneNumber)
+            }
+        } catch(err) {
+            console.log(err)
         }
-        var values = {
-            make: carMake,
-            model: carModel,
-            year: carYear
-        }
-        this.queryFunctions.notifyCarChange("delete", values)
-            .catch(err => console.log(err))
     }
   
     getPutData(car, setValues) {
-      this.setState({
-        shouldGetPutData: true,
-        carIdUpdate: car._id
-      });
-      setValues({
-        make: car.make,
-        model: car.model,
-        year: car.year,
-        rating: car.rating
-      });
+        setValues({
+            make: car.make,
+            model: car.model,
+            year: car.year,
+            rating: car.rating
+        });
+        this.setState({
+            shouldGetPutData: true,
+            carIdUpdate: car._id
+        });
     }
   
-    callPutData(carId, values) {
-        this.queryFunctions.putData(carId, values)
-            .then(res => this.setState({ 
-                cars: res,
+    callPutData = async(carId, values) => {
+        try {
+            const updatedCar = await this.queryFunctions.putData(carId, values, this.props.user.phoneNumber)
+            const newCarsData = this.state.cars.map((car) => {
+                if (car._id === updatedCar._id) {
+                    return updatedCar;
+                } else {
+                    return car;
+                }
+            })
+
+            this.setState({
+                cars: newCarsData,
                 shouldGetPutData: false,
                 carIdUpdate: null
-            }))
-            .catch(err => console.log(err));
+            })
 
-        this.queryFunctions.notifyCarChange("update", values)
-            .catch(err => console.log(err))
+            if (this.props.user.subscribed) {
+                this.queryFunctions.notifyCarChange("update", values, this.props.user.phoneNumber)
+            }
+        } catch(err) {
+            console.log(err)
+        }
     }
   
     getPostData(resetForm) {
-        this.setState({shouldGetPostData: true});
         resetForm({
             make: "",
             model: "",
             year: "",
             rating: ""
         })
+        this.setState({shouldGetPostData: true});
     }
   
-    callPostData(values) {
-        this.queryFunctions.postData(values)
-            .then(res => this.setState({ 
-                cars: res,
-                shouldGetPostData: false,
-                carIdUpdate: null,
-            }))
-            .catch(err => alert(err));
+    callPostData = async(values) => {
+        try {
+            const newCar = await this.queryFunctions.postData(values, this.props.user.phoneNumber)
+            var newCarsData = this.state.cars;
+            newCarsData.push(newCar);
 
-        this.queryFunctions.notifyCarChange("create", values)
-            .catch(err => console.log(err))
+            this.setState({
+                cars: newCarsData,
+                shouldGetPostData: false,
+            })
+
+            if (this.props.user.subscribed) {
+                this.queryFunctions.notifyCarChange("create", values, this.props.user.phoneNumber)
+            }
+
+        } catch(err) {
+            console.log(err)
+        }
     }
 
-    setRepairsForCar = (repairCarId, repairCarMake, repairCarModel, repairCarYear) => {
-        this.queryFunctions.getRepairsForCar(repairCarId)
-            .then(res => this.setState({ 
-                repairsForCar: res,
-                repairCarId: repairCarId,
-                repairCarMake: repairCarMake,
-                repairCarModel: repairCarModel,
-                repairCarYear: repairCarYear
-            }))
-            .catch(err => console.log(err));
+    setRepairsForCar = async(car) => {
+        try {
+            const repairsForCar = await this.queryFunctions.getRepairsForCar(car._id)
+            this.setState({
+                repairsForCar: repairsForCar,
+                repairCarId: car._id,
+                repairCarMake: car.make,
+                repairCarModel: car.model,
+                repairCarYear: car.year
+            })
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     showRepairsForCar = () => {
@@ -137,7 +164,6 @@ class CarsComponent extends Component {
     rowColStyles = {
         "border-collapse": "collapse",
         "border": "1px solid #dddddd"
-     
     };
   
     getCarsDisplay = (setValues, values, submitForm, setFieldValue) => {
@@ -162,8 +188,8 @@ class CarsComponent extends Component {
                     <td> {car.rating} </td>
                     <td>
                         <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.setRepairsForCar(car._id, car.make, car.model, car.year)} >SEE REPAIRS</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car._id, car.make, car.model, car.year)}>DELETE</button> 
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.setRepairsForCar(car)} >SEE REPAIRS</button>
+                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car)}>DELETE</button> 
                     </td>
                 </tr>)
             }

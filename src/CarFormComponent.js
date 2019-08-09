@@ -13,19 +13,24 @@ class CarFormComponent extends Component {
       }
     }
 
-    componentDidMount() {
-        queryFunctions.getAllCarYears()
-            .then(res => this.setState({ yearsRange: res }))
-            .catch(err => alert(err));
+    async componentDidMount() {
+        try {
+            const yearsRange = await queryFunctions.getAllCarYears();
+            if (this.props.values.year !== "") {
+                const allMakes = await queryFunctions.getAllCarMakes(this.props.values.year);
+                const allModels = await queryFunctions.getAllCarModels(this.props.values.make, this.props.values.year);
 
-        if (this.props.values.year !== "") {
-            queryFunctions.getAllCarMakes(this.props.values.year)
-                .then(res => this.setState({ allMakes: res }))
-                .catch(err => alert(err));
+                this.setState({
+                    yearsRange: yearsRange, 
+                    allMakes: allMakes,
+                    allModels: allModels
+                })
+            } else {
+                this.setState({ yearsRange: yearsRange })
+            }
 
-            queryFunctions.getAllCarModels(this.props.values.make, this.props.values.year)
-                .then(res => this.setState({ allModels: res }))
-                .catch(err => alert(err));
+        } catch(err) {
+            console.log(err);
         }
     }
 

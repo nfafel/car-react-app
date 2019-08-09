@@ -12,14 +12,18 @@ class HomeComponent extends Component {
         }
     }
     
-    componentDidMount() {
-        queryFunctions.getRepairsData()
-            .then(res => this.setState({ repairs: res.repairs }))
-            .catch(err => console.log(err)); 
-            
-        queryFunctions.getCarsData()
-            .then(res => this.setState({ cars: res.cars }))
-            .catch(err => console.log(err));
+    async componentDidMount() {
+        try {
+            const repairs = await queryFunctions.getRepairsData(this.props.user.phoneNumber);
+            const cars = await queryFunctions.getCarsData(this.props.user.phoneNumber);
+
+            this.setState({
+                repairs: repairs,
+                cars: cars
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     tableStyles = {
@@ -40,14 +44,6 @@ class HomeComponent extends Component {
                 return this.state.cars[i];
             }
         }
-    }
-
-    reverseRepairsDisplay = (repairsDisplay) => {
-        var reversedRepairsDisplay = [];
-        for (var i=repairsDisplay.length-1; i>=0; i--) {
-            reversedRepairsDisplay.push(repairsDisplay[i]);
-        }
-        return reversedRepairsDisplay;
     }
 
     getRepairsDisplay = () => {
