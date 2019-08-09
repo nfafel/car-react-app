@@ -4,6 +4,7 @@ import { Formik, Form,} from 'formik';
 import * as Yup from 'yup'
 import RepairsByCarComponent from './RepairsByCarComponent'
 import CarFormComponent from './CarFormComponent'
+import { connect } from 'react-redux';
 
 const restQueryFunctions = require('./queryFuncForCarsComponent');
 const graphQLQueryFunctions = require('./graphQLQueriesForCars');
@@ -22,7 +23,7 @@ class CarsComponent extends Component {
             repairCarModel: null,
             repairCarYear: null
         }
-        this.queryFunctions = (this.props.queryFuncType === "rest") ? restQueryFunctions : graphQLQueryFunctions;
+        this.queryFunctions = (this.props.queryType === "rest") ? restQueryFunctions : graphQLQueryFunctions;
     }
 
     async componentDidMount() {
@@ -261,5 +262,12 @@ class CarsComponent extends Component {
       );
     }
 }
+
+const mapStateToProps = function(state) {
+    return {
+        user: state.user,
+        queryType: state.queryType
+    }
+}
   
-export default CarsComponent;
+export default connect(mapStateToProps)(CarsComponent);

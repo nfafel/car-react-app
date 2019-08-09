@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import './App.css';
 import { Formik, Form, Field, ErrorMessage} from 'formik';
-import * as Yup from 'yup'
+import * as Yup from 'yup';
+import {loginUser, setQueryType} from './redux/actions';
+import { connect } from 'react-redux';
 
-class CarsComponent extends Component {
+class LoginComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -15,8 +17,8 @@ class CarsComponent extends Component {
         }
     }
 
-    checkIfRegistered = async(phoneNumber) => { 
-        var parsedNumber = phoneNumber.replace(/-|\(|\)/g, "");
+    checkIfRegistered = async(values) => { 
+        var parsedNumber = values.phoneNumber.replace(/-|\(|\)/g, "");
 
         var body;
         try{
@@ -29,6 +31,7 @@ class CarsComponent extends Component {
         if(body.user == null) {
             alert("The phone number you entered is not a registered number. Please sign up for a new account.")
         } else {
+            this.props.setQueryType(values.queryType)
             this.validateUsername(body.user);
         }
     }
@@ -62,7 +65,7 @@ class CarsComponent extends Component {
         var correctConfirmationNum = (values.enteredConfirmationNumber === this.state.confirmationNumber);
         var correctPassword = (values.password === this.state.user.password);
         if (correctConfirmationNum && correctPassword) {
-            this.props.setUser(this.state.user)
+            this.props.loginUser(this.state.user)
         } else {
             if (this.state.incorrectGuesses < 2) {
                 alert("The confirmation number or password you provided is incorrect. Please try again.")
@@ -73,7 +76,8 @@ class CarsComponent extends Component {
                 alert("You have attempted to login too many times. Please restart.")
                 this.setState({
                     incorrectGuesses: 0,
-                    SMSConfirmationForm: "closed"
+                    SMSConfirmationForm: "closed",
+                    confirmationNumber: null
                 })
             }
         }
@@ -82,7 +86,9 @@ class CarsComponent extends Component {
     UsernameValidationSchema = Yup.object().shape({
         phoneNumber: Yup.string()
             .required('Required')
-            .matches(/\([0-9]{3}\)-[0-9]{3}-[0-9]{4}/, 'Required Format: (XXX)-XXX-XXXX')
+            .matches(/\([0-9]{3}\)-[0-9]{3}-[0-9]{4}/, 'Required Format: (XXX)-XXX-XXXX'),
+        queryType: Yup.string()
+            .required("Required")
     })
 
     PasswordValidationSchema = Yup.object().shape({
@@ -100,8 +106,8 @@ class CarsComponent extends Component {
         "outline":"none"
     }
 
-    testtest = async(phoneNumber) => {
-        var parsedNumber = phoneNumber.replace(/-|\(|\)/g, "");
+    testtest = async(values) => {
+        var parsedNumber = values.phoneNumber.replace(/-|\(|\)/g, "");
         var body;
         try{
             const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/1${parsedNumber}`)
@@ -109,13 +115,15 @@ class CarsComponent extends Component {
         } catch(err) {
             console.log(err)
         }
-        this.props.setUser(body.user)
+        this.props.setQueryType(values.queryType)
+
+        this.props.loginUser(body.user)
     }
 
     formStyle = { 
         "border": "solid", 
         "backgroundColor": "#cdf6f7", 
-        "width": 400
+        "width": 500
     }
 
     render() {
@@ -123,16 +131,23 @@ class CarsComponent extends Component {
         if (this.state.usernameForm === "open") {
             LoginForm = (
                 <Formik
-                    initialValues = {{phoneNumber: ''}}
+                    initialValues = {{phoneNumber: '', queryType: 'rest'}}
                     validationSchema={this.UsernameValidationSchema}
-                    //onSubmit = {(values) => this.checkIfRegistered(values.phoneNumber)}
-                    onSubmit = {(values) => this.testtest(values.phoneNumber)}
+                    //onSubmit = {(values) => this.checkIfRegistered(values)}
+                    onSubmit = {(values) => this.testtest(values)}
                 >
                 {(props) => (
                     <Form style={this.formStyle} >
                         <p>Login</p>
-                        <Field type="tel" name="phoneNumber" placeholder="Phone Number"/>
-                        <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
+                        <div>
+                            <Field type="tel" name="phoneNumber" placeholder="Phone Number"/>
+                            <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
+                        </div>
+                        <div style={{marginTop: 10}}>
+                            <Field type="radio" name="queryType" value="rest" checked={props.values.queryType === "rest"} /> Rest <span style={{marginLeft:"0.5em"}} />
+                            <Field type="radio" name="queryType" value="graphql" /> GraphQL
+                            <ErrorMessage name="queryType" component="div" style={{color:"red", fontSize: 14}} />
+                        </div>
                         <div style={{"margin": 15}}>
                             <button style={{backgroundColor: '#d0d5db'}} type="submit">Next</button>
                         </div>
@@ -176,5 +191,12 @@ class CarsComponent extends Component {
         )
     }
 }
+
+const mapDispatchToProps = function(dispatch) {
+    return {
+        loginUser: user => dispatch(loginUser({user: user})),
+        setQueryType: queryType => dispatch(setQueryType({queryType: queryType}))
+    }
+}
   
-export default CarsComponent;
+export default connect(null, mapDispatchToProps)(LoginComponent);

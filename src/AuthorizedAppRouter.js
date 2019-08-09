@@ -6,99 +6,94 @@ import RepairsComponent from './RepairsComponent'
 import HomeComponent from './HomeComponent'
 import GraphQLRepairsComponent from './GraphQLRepairsComponent'
 import GraphQLHomeComponent from './GraphQLHomeComponent'
+import { connect } from 'react-redux';
 
-function RestHome(user) {
-    return (
-      <div>
-        <h2>Last Logged Repairs - REST</h2>
-        <HomeComponent user={user} />
-      </div>
-    )
-  }
+function RestHome() {
+  return (
+    <div>
+      <h2>Last Logged Repairs - REST</h2>
+      <HomeComponent />
+    </div>
+  )
+}
   
-  function RestCars(user) {
-    return (
-      <div>
-        <h2>Cars - REST</h2>
-        <CarsComponent user={user} queryFuncType={"rest"} />
-      </div>
-    );
-  }
-  
-  function RestRepairs(user) {
-    return (
-      <div>
-        <h2>Repairs - REST</h2>
-        <RepairsComponent user={user} />
-      </div>
-    );
-  }
-  
-  function GraphQLHome(user) {
-    return (
-      <div>
-        <h2>Last Logged Repairs - GraphQL</h2>
-        <GraphQLHomeComponent user={user} />
-      </div>
-    )
-  }
-  
-  function GraphQLCars(user) {
-    return (
-      <div>
-        <h2>Cars - GraphQL</h2>
-        <CarsComponent user={user} queryFuncType={"graphql"} />
-      </div>
-    );
-  }
-  
-  function GraphQLRepairs(user) {
-    return (
-      <div>
-        <h2>Repairs - GraphQL</h2>
-        <GraphQLRepairsComponent user={user} />
-      </div>
-    );
-  }
-  
-  class AuthorizedAppRouter extends Component {
-    render () {
-      var HomeComponent;
-      var CarsComponent;
-      var RepairsComponent;
-      if (this.props.queryType === "rest") {
-        HomeComponent = RestHome;
-        CarsComponent = RestCars
-        RepairsComponent = RestRepairs
-      } else {
-        HomeComponent = GraphQLHome;
-        CarsComponent = GraphQLCars
-        RepairsComponent = GraphQLRepairs
-      }
-  
-      return (
-        <Router>
-          <div>
-            <nav>
-              <table style={{"width":'30%'}}>
-                <tr>
-                  <th><Link to="/">Home</Link></th>
-                  
-                  <th><Link to="/cars/">Cars</Link></th>
-                  
-                  <th><Link to="/repairs/">Repairs</Link></th>
-                  
-                </tr>
-              </table>
-            </nav>
-  
-            <Route path="/" exact render={() => HomeComponent(this.props.user)} />
-            <Route path="/cars/" render={() => CarsComponent(this.props.user)} />
-            <Route path="/repairs/" render={() => RepairsComponent(this.props.user)} />
-          </div>
-        </Router>
-      );
-    }
+function RestRepairs() {
+  return (
+    <div>
+      <h2>Repairs - REST</h2>
+      <RepairsComponent />
+    </div>
+  );
 }
 
-export default AuthorizedAppRouter;
+function GraphQLHome() {
+  return (
+    <div>
+      <h2>Last Logged Repairs - GraphQL</h2>
+      <GraphQLHomeComponent />
+    </div>
+  )
+}
+
+function GraphQLRepairs() {
+  return (
+    <div>
+      <h2>Repairs - GraphQL</h2>
+      <GraphQLRepairsComponent />
+    </div>
+  );
+}
+
+function Cars() {
+  return (
+    <div>
+      <h2>Cars - REST</h2>
+      <CarsComponent />
+    </div>
+  );
+}
+  
+class AuthorizedAppRouter extends Component {
+  render () {
+    var HomeComponent;
+    var RepairsComponent;
+    if (this.props.queryType === "rest") {
+      HomeComponent = RestHome;
+      RepairsComponent = RestRepairs
+    } else {
+      HomeComponent = GraphQLHome;
+      RepairsComponent = GraphQLRepairs
+    }
+
+    return (
+      <Router>
+        <div>
+          <nav>
+            <table style={{"width":'30%'}}>
+              <tr>
+                <th><Link to="/">Home</Link></th>
+                
+                <th><Link to="/cars/">Cars</Link></th>
+                
+                <th><Link to="/repairs/">Repairs</Link></th>
+                
+              </tr>
+            </table>
+          </nav>
+
+          <Route path="/" exact component={HomeComponent} />
+          <Route path="/cars/" component={Cars} />
+          <Route path="/repairs/" component={RepairsComponent} />
+        </div>
+      </Router>
+    );
+  }
+}
+
+const mapStateToProps = function(state) {
+  return {
+      queryType: state.queryType
+  }
+}
+
+export default connect(mapStateToProps)(AuthorizedAppRouter);

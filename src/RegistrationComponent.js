@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
 import { Formik, Form, Field, ErrorMessage} from 'formik';
-import * as Yup from 'yup'
+import * as Yup from 'yup';
+import { connect } from 'react-redux';
+import {loginUser} from './redux/actions';
 
 class RegistrationComponent extends Component {
 
@@ -98,7 +100,7 @@ class RegistrationComponent extends Component {
                     subscribed: false
                 })
             });
-            this.props.setUser({
+            this.props.loginUser({
                 phoneNumber: this.state.phoneNumber,
                 password: values.password,
                 subscribed: false
@@ -187,4 +189,10 @@ class RegistrationComponent extends Component {
 
 }
 
-export default RegistrationComponent;
+const mapDispatchToProps = function(dispatch) {
+    return {
+        loginUser: user => dispatch(loginUser({user: user}))
+    }
+}
+
+export default connect(null, mapDispatchToProps)(RegistrationComponent);

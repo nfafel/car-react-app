@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import './App.css';
+import { connect } from 'react-redux';
 
 class SubscriptionComponent extends Component {
-
     constructor(props){
       super(props);
       this.state = {
@@ -20,7 +20,7 @@ class SubscriptionComponent extends Component {
     changeSubscription = async() => {
         this.setState({subscribed: !this.state.subscribed})
         try {
-            const newUserResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.props.user.phoneNumber}/changeSubscription`, {
+            fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.props.user.phoneNumber}/changeSubscription`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -30,8 +30,6 @@ class SubscriptionComponent extends Component {
                     subscribed: !this.state.subscribed
                 })
             });
-            const body = await newUserResponse.json();
-            this.props.setUser(body.user)
         } catch(err) {
             console.log(err)
         }
@@ -51,7 +49,12 @@ class SubscriptionComponent extends Component {
             </div>
         )
     }
-
 }
 
-export default SubscriptionComponent;
+const mapStateToProps = function(state) {
+    return {
+        user: state.user
+    }
+}
+
+export default connect(mapStateToProps)(SubscriptionComponent);

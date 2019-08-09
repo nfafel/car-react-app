@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+import { connect } from 'react-redux';
 
 const queryFunctions = require('./queryFuncForRepairsComponent')
 
@@ -91,6 +92,12 @@ class HomeComponent extends Component {
             </div>
         );
     }
-  }
+}
+
+const mapStateToProps = function(state) {
+    return {
+        user: state.user
+    }
+}
   
-  export default HomeComponent;
+export default connect(mapStateToProps)(HomeComponent);

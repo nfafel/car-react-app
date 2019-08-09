@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { connect } from 'react-redux';
 
 import RepairFormComponent from './RepairFormComponent'
 
@@ -275,6 +276,12 @@ class RepairsComponent extends Component {
             </div>
         );
     }
-  }
+}
   
-  export default RepairsComponent;
+const mapStateToProps = function(state) {
+    return {
+        user: state.user
+    }
+}
+
+export default connect(mapStateToProps)(RepairsComponent);
