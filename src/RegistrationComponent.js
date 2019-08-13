@@ -74,21 +74,22 @@ class RegistrationComponent extends Component {
             registrationForm: "closed",
             confirmationForm: "open"
         })
-        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                confirmationNumber: confirmationNumber.toString()
-            })
-        });
+        alert(confirmationNumber)
+        // fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({
+        //         confirmationNumber: confirmationNumber.toString()
+        //     })
+        // });
     }
 
-    confirmRegistration = (values) => {
+    confirmRegistration = async(values) => {
         if (parseInt(values.confirmationNumber) === this.state.confirmationNumber) {
-            fetch(`https://tranquil-caverns-41069.herokuapp.com/users`, {
+            const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -100,11 +101,9 @@ class RegistrationComponent extends Component {
                     subscribed: false
                 })
             });
-            this.props.loginUser({
-                phoneNumber: this.state.phoneNumber,
-                password: values.password,
-                subscribed: false
-            });
+            const body = await response.json();
+            this.props.loginUser(body.token);
+            this.props.cancel();
         } else {
             if (this.state.incorrectGuesses < 2) {
                 alert("The confirmation number you provided is incorrect. Please try again.")
@@ -121,6 +120,40 @@ class RegistrationComponent extends Component {
         }
     }
 
+    getFormFields = (values) => {
+        if (this.state.registrationForm === 'open') {
+            return (
+                <div>
+                    <p style={{fontSize: 25, margin: 12}}>Registration</p>
+                    <p>Enter your phone number below. <br/> It will act as your username:</p>
+                    <Field type="tel" name="phoneNumber" placeholder="(XXX)-XXX-XXXX" style={{height: 20, fontSize: 12}} />
+                    <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
+                </div>
+            )
+        } else {
+            return (
+                <div>
+                    <p>Enter the confirmation number sent to the number below, <br/> and your desired password:</p>
+                    <div>
+                        <input value={values.phoneNumber} readOnly style={{height: 20, fontSize: 12}} />
+                    </div>
+                    <div style={{marginTop: 15}}>
+                        <Field type="numeric" name="confirmationNumber" placeholder="Confirmation Number" style={{height: 20, fontSize: 12}}/>
+                        <ErrorMessage name="confirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
+                    </div> 
+                    <div style={{marginTop: 5}}>
+                        <Field type="password" name="password" placeholder="Password" style={{height: 20, fontSize: 12}}/>
+                        <ErrorMessage name="password" component="div" style={{color:"red", fontSize: 14}} />   
+                    </div>
+                    <div>
+                        <Field type="password" name="confirmPassword" placeholder="Confirm Password" style={{height: 20, fontSize: 12}}/>
+                        <ErrorMessage name="confirmPassword" component="div" style={{color:"red", fontSize: 14}} />
+                    </div>
+                </div>
+            )
+        }
+    }
+
     handleSubmit = (values) => {
         if (this.state.registrationForm === 'open') {
             this.checkAvailability(values.phoneNumber);
@@ -130,47 +163,17 @@ class RegistrationComponent extends Component {
     }
 
     render() {
-        var fields
-        if (this.state.confirmationForm === 'open') {
-            fields = (
-                <div>
-                    <div>
-                        <Field type="tel" name="phoneNumber" placeholder="(XXX)-XXX-XXXX"/>
-                        <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
-                    </div>
-                    <div style={{marginTop: 15}}>
-                        <Field type="numeric" name="confirmationNumber" placeholder="Confirmation Number"/>
-                        <ErrorMessage name="confirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
-                    </div> 
-                    <div style={{marginTop: 5}}>
-                        <Field type="password" name="password" placeholder="Password"/>
-                        <ErrorMessage name="password" component="div" style={{color:"red", fontSize: 14}} />   
-                    </div>
-                    <div>
-                        <Field type="password" name="confirmPassword" placeholder="Confirm Password"/>
-                        <ErrorMessage name="confirmPassword" component="div" style={{color:"red", fontSize: 14}} />
-                    </div>
-                </div>
-            )
-        } else {
-            fields = (
-                <div>
-                    <Field type="tel" name="phoneNumber" placeholder="(XXX)-XXX-XXXX"/>
-                    <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
-                </div>
-            )
-        }
-        
-        var properForm = (
-            <Formik
+
+        return (
+            <div style={this.formStyle}>
+                <Formik
                 initialValues = {{phoneNumber: '', confirmationNumber: '', password: '', confirmPassword: ''}}
                 validationSchema={this.registrationValidationSchema()}
                 onSubmit = {(values) => this.handleSubmit(values)}
             >
             {(props) => (
                 <Form>
-                    <p>Enter your phone number below. <br/> It will act as your username:</p>
-                    {fields}
+                    {this.getFormFields(props.values)}
                     <div style={{margin: 15}}>
                         <button style={{marginRight: 4}} type="button" onClick={() => this.props.cancel()}>Cancel</button>
                         <button type="submit">{(this.state.confirmationForm === 'open') ? ("Register") : ("Next")}</button>
@@ -178,11 +181,6 @@ class RegistrationComponent extends Component {
                 </Form>
             )}
             </Formik>
-        )
-
-        return (
-            <div style={this.formStyle}>
-                {properForm}
             </div>
         )
     }
@@ -191,7 +189,7 @@ class RegistrationComponent extends Component {
 
 const mapDispatchToProps = function(dispatch) {
     return {
-        loginUser: user => dispatch(loginUser({user: user}))
+        loginUser: token => dispatch(loginUser({token: token}))
     }
 }
 

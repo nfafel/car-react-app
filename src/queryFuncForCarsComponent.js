@@ -1,19 +1,19 @@
 
 exports.getCarsData = async(token) => {
-    const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars`, {
-      method: "GET",
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      var error = new Error(body.message);
-      error.statusCode = response.status;
-      throw error;
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/cars`, {
+    method: "GET",
+    headers: {
+      'Authorization': `Bearer ${token}`
     }
-    return body.cars;
+  });
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    var error = new Error(body.message);
+    error.statusCode = response.status;
+    throw error;
+  }
+  return body.cars;
 };
 
 exports.deleteData = async(carId, token) => {
