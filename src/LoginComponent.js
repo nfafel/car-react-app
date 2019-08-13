@@ -9,44 +9,46 @@ class LoginComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            usernameForm: "open",
-            passwordForm: "closed",
+            loginForm: "open",
+            confirmationForm: "closed",
             confirmationNumber: null,
-            user: null,
+            phoneNumber: null,
+            token: null,
             incorrectGuesses: 0
         }
     }
 
-    checkIfRegistered = async(values) => { 
-        var parsedNumber = values.phoneNumber.replace(/-|\(|\)/g, "");
-
-        var body;
+    prepareLogin = async(values) => { 
+        var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
+        
         try{
-            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/1${parsedNumber}`)
-            body = await userResponse.json();
+            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/login`, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumber: parsedNumber,
+                    password: values.password
+                })
+            })
+            const body = await userResponse.json();
+            if(body.message) {
+                alert(body.message)
+            } else {
+                this.confirmLogin(parsedNumber, body.token);
+            }
+
         } catch(err) {
             console.log(err)
         }
-
-        if(body.user == null) {
-            alert("The phone number you entered is not a registered number. Please sign up for a new account.")
-        } else {
-            this.props.setQueryType(values.queryType)
-            this.validateUsername(body.user);
-        }
     }
 
-    validateUsername = async(user) => {
+    confirmLogin = async(parsedNumber, token) => {
         var confirmationNumber = Math.floor(Math.random() * 900000) + 100000;
-        this.setState({
-            usernameForm: "closed",
-            passwordForm: "open",
-            confirmationNumber: confirmationNumber,
-            user: user
-        })
-
         try{
-            fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/sendConfirmation/${user.phoneNumber}`, {
+            fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -56,16 +58,26 @@ class LoginComponent extends Component {
                     confirmationNumber: confirmationNumber.toString()
                 })
             });
+            this.setState({
+                phoneNumber: parsedNumber,
+                token: token,
+                confirmationNumber: confirmationNumber,
+                loginForm: 'closed',
+                confimationForm: 'open'
+            })
         } catch(err) {
             console.log(err)
         }
     }
 
-    attemptLogin = (values) => {
-        var correctConfirmationNum = (values.enteredConfirmationNumber === this.state.confirmationNumber);
-        var correctPassword = (values.password === this.state.user.password);
-        if (correctConfirmationNum && correctPassword) {
-            this.props.loginUser(this.state.user)
+    login = async(values) => {
+        if (values.confirmationNumber === this.state.confirmationNumber) {
+            try {    
+                this.props.loginUser(this.state.token)
+            } catch(err) {
+                console.log(err)
+            }
+
         } else {
             if (this.state.incorrectGuesses < 2) {
                 alert("The confirmation number or password you provided is incorrect. Please try again.")
@@ -76,48 +88,43 @@ class LoginComponent extends Component {
                 alert("You have attempted to login too many times. Please restart.")
                 this.setState({
                     incorrectGuesses: 0,
-                    SMSConfirmationForm: "closed",
+                    passwordForm: "closed",
                     confirmationNumber: null
                 })
             }
         }
     }
 
-    UsernameValidationSchema = Yup.object().shape({
-        phoneNumber: Yup.string()
-            .required('Required')
-            .matches(/\([0-9]{3}\)-[0-9]{3}-[0-9]{4}/, 'Required Format: (XXX)-XXX-XXXX'),
-        queryType: Yup.string()
-            .required("Required")
-    })
+    loginValidationSchema = () => {
+        if (this.state.loginForm === "open") {
+            return (
+                Yup.object().shape({
+                    phoneNumber: Yup.string()
+                        .required('Required')
+                        .matches(/\([0-9]{3}\)-[0-9]{3}-[0-9]{4}/, 'Required Format: (XXX)-XXX-XXXX'),
+                    password: Yup.string()
+                        .required('Required'),
+                    queryType: Yup.string()
+                        .required("Required"),
+                })
+            )
+        } else {
+            return (
+                Yup.object().shape({
+                    confirmationNumber: Yup.number()
+                        .required("Requried")
+                        .typeError('Must Enter a Number')
+                })
+            )
+        }
+    }
 
-    PasswordValidationSchema = Yup.object().shape({
-        enteredConfirmationNumber: Yup.number()
-            .required('Required')
-            .typeError('Must Enter a Number'),
-        password: Yup.string()
-            .required('Required')
-    })
-
-    smsButtonStyle = {
+    registerButtonStyle = {
         "border": "none", 
         "background":"none", 
         "color":"blue", 
-        "outline":"none"
-    }
-
-    testtest = async(values) => {
-        var parsedNumber = values.phoneNumber.replace(/-|\(|\)/g, "");
-        var body;
-        try{
-            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/1${parsedNumber}`)
-            body = await userResponse.json();
-        } catch(err) {
-            console.log(err)
-        }
-        this.props.setQueryType(values.queryType)
-
-        this.props.loginUser(body.user)
+        "outline":"none",
+        "fontSize": 13
     }
 
     formStyle = { 
@@ -126,67 +133,117 @@ class LoginComponent extends Component {
         "width": 500
     }
 
-    render() {
-        var LoginForm;
-        if (this.state.usernameForm === "open") {
-            LoginForm = (
-                <Formik
-                    initialValues = {{phoneNumber: '', queryType: 'rest'}}
-                    validationSchema={this.UsernameValidationSchema}
-                    //onSubmit = {(values) => this.checkIfRegistered(values)}
-                    onSubmit = {(values) => this.testtest(values)}
-                >
-                {(props) => (
-                    <Form style={this.formStyle} >
-                        <p>Login</p>
-                        <div>
-                            <Field type="tel" name="phoneNumber" placeholder="Phone Number"/>
-                            <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
-                        </div>
-                        <div style={{marginTop: 10}}>
-                            <Field type="radio" name="queryType" value="rest" checked={props.values.queryType === "rest"} /> Rest <span style={{marginLeft:"0.5em"}} />
-                            <Field type="radio" name="queryType" value="graphql" /> GraphQL
-                            <ErrorMessage name="queryType" component="div" style={{color:"red", fontSize: 14}} />
-                        </div>
-                        <div style={{"margin": 15}}>
-                            <button style={{backgroundColor: '#d0d5db'}} type="submit">Next</button>
-                        </div>
-                    </Form>
-                )}
-                </Formik>
+    testtest = async(values) => {
+        var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
+
+        try{
+            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/login`, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumber: parsedNumber,
+                    password: values.password
+                })
+            })
+            const body = await userResponse.json();
+
+            if(body.message) {
+                alert(body.message)
+            } else {
+                this.props.setQueryType(values.queryType)
+                this.props.loginUser(body.token)
+            }
+
+        } catch(err) {
+            alert(err)
+        }
+    }
+
+    resetLogin = async(resetForm) => {
+        resetForm();
+        this.setState({
+            loginForm: "open",
+            confirmationForm: "closed",
+            confirmationNumber: null,
+            phoneNumber: null,
+            token: null,
+            incorrectGuesses: 0
+        });
+    }
+
+    getLoginForm = (values, resetForm) => {
+        var loginForm;
+        if (this.state.loginForm === "open") {
+            loginForm = (
+                <Form style={this.formStyle} >
+                    <p style={{fontSize: 25, margin: 12}}>Login</p>
+                    <div style={{margin:15}}>
+                        <Field type="tel" name="phoneNumber" placeholder="Phone Number" style={{height: 20, fontSize: 12}}/>
+                        <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
+                    </div>
+                    <div style={{margin:15}}>
+                        <Field type="password" name="password" placeholder="Password" style={{height: 20, fontSize: 12}}/>
+                        <ErrorMessage name="password" component="div" style={{color:"red", fontSize: 14}} />
+                    </div>
+                    <div style={{marginTop: 10}}>
+                        <Field type="radio" name="queryType" value="rest" checked={values.queryType === "rest"} /> Rest <span style={{marginLeft:"0.5em"}} />
+                        <Field type="radio" name="queryType" value="graphql" /> GraphQL
+                    </div>
+                    <div style={{"margin": 15}}>
+                        <button style={{backgroundColor: '#d4d2d2', height: 25, width: 60, fontSize: 15, borderRadius: 6}} type="submit">Next</button>
+                    </div>
+                </Form>   
             )
         } else {
-            LoginForm = (
-                <Formik
-                    initialValues = {{confirmationNumber: '', password: ''}}
-                    validationSchema={this.PasswordValidationSchema}
-                    onSubmit = {(values) => this.attemptLogin(values)}
-                >
-                {(props) => (
-                    <Form style={this.formStyle} >
-                        <p>Enter Password and Confirmation Number:</p>
-                        <div>
-                            <Field type="password" name="password" placeholder="Password"/>
-                            <ErrorMessage name="phoneNumber" component="div" style={{color:"red", fontSize: 14}} />
-                        </div>
-                        <div style={{marginTop: '5px'}}>
-                            <Field type="number" name="enteredConfirmationNumber" placeholder="Confirmation Number"/>
-                            <ErrorMessage name="enteredConfirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
-                        </div>
-                        <div style={{"margin": 15}}>
-                            <button type="button" style={{backgroundColor: '#d0d5db', margin: '5px'}} onClick={() => this.setState({passwordForm: "closed"})}>Close</button>
-                            <button type="submit" style={{backgroundColor: '#d0d5db', margin: '5px'}}>Login</button>
-                        </div>
-                    </Form>
-                )}
-                </Formik>
+            loginForm = (
+                <Form style={this.formStyle} >
+                    <div style={{marginTop: 15}}>
+                        <input value={values.phoneNumber} readOnly style={{height: 20, fontSize: 12}} />
+                    </div>
+                    <div style={{marginTop: 15}}>
+                        <input type="password" value={values.password} readOnly style={{height: 20, fontSize: 12}} />
+                    </div>
+                    <p>Confirmation Number:</p>
+                    <div style={{marginTop: 10}}>
+                        <Field type="number" name="confirmationNumber" placeholder="Confirmation Number" style={{height: 20, fontSize: 12}} />
+                        <ErrorMessage name="confirmationNumber" component="div" style={{color:"red", fontSize: 14}} />
+                    </div>
+                    <div style={{"margin": 15}}>
+                        <button type="button" style={{backgroundColor: '#d0d5db', margin: '5px'}} onClick={() => this.resetLogin(resetForm)}>Close</button>
+                        <button type="submit" style={{backgroundColor: '#d0d5db', margin: '5px'}}>Login</button>
+                    </div>
+                </Form>
             )
         } 
+        return loginForm;
+    }
+
+    handleSubmit = (values) => {
+        if (this.state.loginForm === "open") {
+            this.prepareLogin(values)
+        } else {
+            this.login(values)
+        }
+    }
+
+    render() {
 
         return (
             <div>
-                {LoginForm}
-                <button type="button" style={this.smsButtonStyle} onClick={() => this.props.createAccount()}>Create an Account</button>
+                <Formik
+                    initialValues = {{phoneNumber: '', password: '', queryType: 'rest', confirmationNumber: null}}
+                    validationSchema={this.loginValidationSchema()}
+                    //onSubmit = {(values) => this.handleSubmit(values)}
+                    onSubmit = {(values) => this.testtest(values)}
+                >
+                    {(props) => 
+                        this.getLoginForm(props.values, props.resetForm)
+                    }
+                </Formik>
+                <button type="button" style={this.registerButtonStyle} onClick={() => this.props.createAccount()}>Create an Account</button>
             </div>
         )
     }
@@ -194,7 +251,7 @@ class LoginComponent extends Component {
 
 const mapDispatchToProps = function(dispatch) {
     return {
-        loginUser: user => dispatch(loginUser({user: user})),
+        loginUser: token => dispatch(loginUser({token: token})),
         setQueryType: queryType => dispatch(setQueryType({queryType: queryType}))
     }
 }

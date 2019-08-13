@@ -13,11 +13,11 @@ client.defaultOptions = {
   }
 }
 
-export const getRepairsData = async() => {
+export const getRepairsData = async(phoneNumber) => {
     const result = await client.query({
         query:gql`
             query {
-                repairs {
+                repairs(phoneNumber: ${phoneNumber}) {
                     _id
                     car {
                         _id
@@ -63,9 +63,10 @@ export const deleteData = async(repairId) => {
     return result.data.removeRepair;
 }
 
-export const putData = async(repairId, values) => {
+export const putData = async(repairId, values, phoneNumber) => {
     const result = await client.mutate({
         variables: { input: {
+            phoneNumber: phoneNumber,
             car_id: values.car_id,
             description: values.description,
             date: values.date,
@@ -96,9 +97,10 @@ export const putData = async(repairId, values) => {
     return result.data.updateRepair;
 }
 
-export const postData = async(values) => {
+export const postData = async(values, phoneNumber) => {
     const result = await client.mutate({
         variables: { input: {
+            phoneNumber: phoneNumber,
             car_id: values.car_id,
             description: values.description,
             date: values.date,

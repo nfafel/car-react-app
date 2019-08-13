@@ -60,7 +60,7 @@ class RegistrationComponent extends Component {
         const body = await availabilityResponse.json();
 
         if (body.available) {
-            this.sendConfirmation(parseInt(parsedNumber));
+            this.sendConfirmation(parsedNumber);
         } else {
             alert("An account already exists under the entered phone number.")
         }
@@ -74,7 +74,7 @@ class RegistrationComponent extends Component {
             registrationForm: "closed",
             confirmationForm: "open"
         })
-        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/sendConfirmation/${parsedNumber}`, {
+        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

@@ -5,6 +5,7 @@ import * as Yup from 'yup'
 import RepairsByCarComponent from './RepairsByCarComponent'
 import CarFormComponent from './CarFormComponent'
 import { connect } from 'react-redux';
+import {logoutUser} from './redux/actions';
 
 const restQueryFunctions = require('./queryFuncForCarsComponent');
 const graphQLQueryFunctions = require('./graphQLQueriesForCars');
@@ -28,16 +29,20 @@ class CarsComponent extends Component {
 
     async componentDidMount() {
         try {
-            const cars = await this.queryFunctions.getCarsData(this.props.user.phoneNumber);
-            this.setState( {cars: cars} )
+            const cars = await this.queryFunctions.getCarsData(this.props.token);
+            this.setState({ cars: cars })
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
 
     callDeleteData = async(car) => {
         try {
-            const deletedCarId = await this.queryFunctions.deleteData(car._id);
+            const deletedCarId = await this.queryFunctions.deleteData(car._id, this.props.token);
             const newCarsData = this.state.cars.filter(car => car._id !== deletedCarId);
 
             if (this.state.repairCarId === car._id) { //reset the repairs shown for the car if car is deleted
@@ -49,11 +54,15 @@ class CarsComponent extends Component {
                 this.setState({ cars: newCarsData });
             }
 
-            if (this.props.user.subscribed) {
-                this.queryFunctions.notifyCarChange("delete", car, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     this.queryFunctions.notifyCarChange("delete", car, this.props.user.phoneNumber)
+            // }
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
   
@@ -72,7 +81,7 @@ class CarsComponent extends Component {
   
     callPutData = async(carId, values) => {
         try {
-            const updatedCar = await this.queryFunctions.putData(carId, values, this.props.user.phoneNumber)
+            const updatedCar = await this.queryFunctions.putData(carId, values, this.props.token)
             const newCarsData = this.state.cars.map((car) => {
                 if (car._id === updatedCar._id) {
                     return updatedCar;
@@ -87,11 +96,15 @@ class CarsComponent extends Component {
                 carIdUpdate: null
             })
 
-            if (this.props.user.subscribed) {
-                this.queryFunctions.notifyCarChange("update", values, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     this.queryFunctions.notifyCarChange("update", values, this.props.user.phoneNumber)
+            // }
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
   
@@ -107,7 +120,7 @@ class CarsComponent extends Component {
   
     callPostData = async(values) => {
         try {
-            const newCar = await this.queryFunctions.postData(values, this.props.user.phoneNumber)
+            const newCar = await this.queryFunctions.postData(values, this.props.token)
             var newCarsData = this.state.cars;
             newCarsData.push(newCar);
 
@@ -116,18 +129,22 @@ class CarsComponent extends Component {
                 shouldGetPostData: false,
             })
 
-            if (this.props.user.subscribed) {
-                this.queryFunctions.notifyCarChange("create", values, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     this.queryFunctions.notifyCarChange("create", values, this.props.user.phoneNumber)
+            // }
 
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
 
     setRepairsForCar = async(car) => {
         try {
-            const repairsForCar = await this.queryFunctions.getRepairsForCar(car._id)
+            const repairsForCar = await this.queryFunctions.getRepairsForCar(car._id, this.props.token)
             this.setState({
                 repairsForCar: repairsForCar,
                 repairCarId: car._id,
@@ -136,7 +153,11 @@ class CarsComponent extends Component {
                 repairCarYear: car.year
             })
         } catch(err) {
-            console.log(err);
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
 
@@ -150,20 +171,20 @@ class CarsComponent extends Component {
 
     getNewCarButton = (resetForm) => {
         if (!(this.state.shouldGetPutData || this.state.shouldGetPostData)) {
-            return (<button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>)
+            return (<button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW CAR</button>)
         }
     }
   
     tableStyles = {
         "width": "80%",
-        "border-collapse": "collapse",
+        "borderCollapse": "collapse",
         "border": "1px solid #dddddd",
         "margin": "1em auto"
      
     };
 
     rowColStyles = {
-        "border-collapse": "collapse",
+        "borderCollapse": "collapse",
         "border": "1px solid #dddddd"
     };
   
@@ -188,9 +209,9 @@ class CarsComponent extends Component {
                     <td>{car.model}</td>
                     <td> {car.rating} </td>
                     <td>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.setRepairsForCar(car)} >SEE REPAIRS</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(car)}>DELETE</button> 
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPutData(car, setValues)}>EDIT</button>
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.setRepairsForCar(car)} >SEE REPAIRS</button>
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.callDeleteData(car)}>DELETE</button> 
                     </td>
                 </tr>)
             }
@@ -265,9 +286,15 @@ class CarsComponent extends Component {
 
 const mapStateToProps = function(state) {
     return {
-        user: state.user,
+        token: state.token,
         queryType: state.queryType
     }
 }
+const mapDispatchToProps = function(dispatch) {
+    return {
+        logoutUser: () => dispatch(logoutUser()),
+    }
+}
+
   
-export default connect(mapStateToProps)(CarsComponent);
+export default connect(mapStateToProps, mapDispatchToProps)(CarsComponent);

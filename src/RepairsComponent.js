@@ -3,6 +3,7 @@ import './App.css';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { connect } from 'react-redux';
+import {logoutUser} from './redux/actions';
 
 import RepairFormComponent from './RepairFormComponent'
 
@@ -34,8 +35,8 @@ class RepairsComponent extends Component {
     
     async componentDidMount() {
         try {
-            const cars = await queryFunctions.getCarsData(this.props.user.phoneNumber);
-            const repairs = await queryFunctions.getRepairsData(this.props.user.phoneNumber);
+            const cars = await queryFunctions.getCarsData(this.props.token);
+            const repairs = await queryFunctions.getRepairsData(this.props.token);
 
             var mergedRepairData = [];
             for (var i=0; i< repairs.length; i++) {
@@ -48,8 +49,12 @@ class RepairsComponent extends Component {
                 cars:cars
             });
 
-        } catch(e) {
-            console.error(e);
+        } catch(err) {
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
 
@@ -63,18 +68,22 @@ class RepairsComponent extends Component {
     
     callDeleteData = async(repair) => {
         try {
-            const deletedRepairId = await queryFunctions.deleteData(repair._id, this.props.user.phoneNumber);
+            const deletedRepairId = await queryFunctions.deleteData(repair._id, this.props.token);
             const newMergedRepairs = this.state.mergedRepairs.filter(repair => repair._id !== deletedRepairId);
 
             this.setState({ mergedRepairs: newMergedRepairs});
 
-            if (this.props.user.subscribed) {
-                var car = this.getCarForRepair(repair.car._id, this.state.cars);
-                queryFunctions.notifyRepairChange("delete", repair, car, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     var car = this.getCarForRepair(repair.car._id, this.state.cars);
+            //     queryFunctions.notifyRepairChange("delete", repair, car, this.props.user.phoneNumber)
+            // }
 
         } catch(err) {
-            console.log(err);
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }   
     }
   
@@ -95,7 +104,7 @@ class RepairsComponent extends Component {
   
     callPutData = async(repair, values) => {
         try {
-            const updatedRepair = await queryFunctions.putData(repair._id, values, this.props.user.phoneNumber);
+            const updatedRepair = await queryFunctions.putData(repair._id, values, this.props.token);
             const carForRepair = this.getCarForRepair(updatedRepair.car_id, this.state.cars)
             const mergedRepair = new RepairWithCar(carForRepair, updatedRepair);
             
@@ -112,12 +121,16 @@ class RepairsComponent extends Component {
                 repairUpdated: null
             });
 
-            if (this.props.user.subscribed) {
-                var car = this.getCarForRepair(values.car_id, this.state.cars);
-                queryFunctions.notifyRepairChange("update", values, car, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     var car = this.getCarForRepair(values.car_id, this.state.cars);
+            //     queryFunctions.notifyRepairChange("update", values, car, this.props.user.phoneNumber)
+            // }
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
   
@@ -135,7 +148,7 @@ class RepairsComponent extends Component {
   
     callPostData = async(values) => {
         try {
-            const newRepair = await queryFunctions.postData(values, this.props.user.phoneNumber);
+            const newRepair = await queryFunctions.postData(values, this.props.token);
             const carForRepair = this.getCarForRepair(newRepair.car_id, this.state.cars)
             const mergedRepair = new RepairWithCar(carForRepair, newRepair);
             
@@ -147,12 +160,16 @@ class RepairsComponent extends Component {
                 shouldGetPostData: false
             });
 
-            if (this.props.user.subscribed) {
-                var car = this.getCarForRepair(values.car_id, this.state.cars);
-                queryFunctions.notifyRepairChange("create", values, car, this.props.user.phoneNumber)
-            }
+            // if (this.props.user.subscribed) {
+            //     var car = this.getCarForRepair(values.car_id, this.state.cars);
+            //     queryFunctions.notifyRepairChange("create", values, car, this.props.user.phoneNumber)
+            // }
         } catch(err) {
-            console.log(err)
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
   
@@ -280,8 +297,13 @@ class RepairsComponent extends Component {
   
 const mapStateToProps = function(state) {
     return {
-        user: state.user
+        token: state.token
+    }
+}
+const mapDispatchToProps = function(dispatch) {
+    return {
+        logoutUser: () => dispatch(logoutUser()),
     }
 }
 
-export default connect(mapStateToProps)(RepairsComponent);
+export default connect(mapStateToProps, mapDispatchToProps)(RepairsComponent);

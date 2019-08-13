@@ -13,11 +13,11 @@ client.defaultOptions = {
   }
 }
 
-export const getCarsData = async() => {
+export const getCarsData = async(phoneNumber) => {
   const result = await client.query({
     query: gql`
       query {
-        cars {
+        cars(phoneNumber: ${phoneNumber}) {
           _id 
           make
           model 
@@ -47,9 +47,10 @@ export const deleteData = async(carId) => {
   return result.data.removeCar;
 }
 
-export const putData = async(carId, values) => {
+export const putData = async(carId, values, phoneNumber) => {
   const result = await client.mutate({
     variables: {input: {
+      phoneNumber: phoneNumber,
       make: values.make,
       model: values.model,
       year: parseInt(values.year),
@@ -70,9 +71,10 @@ export const putData = async(carId, values) => {
   return result.data.updateCar;
 }
 
-export const postData = async(values) => {
+export const postData = async(values, phoneNumber) => {
   const result = await client.mutate({
     variables: {input: {
+      phoneNumber: phoneNumber,
       make: values.make,
       model: values.model,
       year: parseInt(values.year),

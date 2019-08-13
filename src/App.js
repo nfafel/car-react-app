@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
 
-import { Provider } from "react-redux";
-import store from './redux/store'
-import { connect } from 'react-redux';
+import { Provider, connect } from "react-redux";
+import { PersistGate } from 'redux-persist/integration/react'
+import reduxFunc from './redux/store'
 
 import AuthorizedAppRouter from './AuthorizedAppRouter'
 import SubscriptionComponent from './SubscriptionComponent'
@@ -51,7 +51,7 @@ class CarRepairApp extends Component {
           <h1 className="App-title" style={{"margin":"0em"}}>Car Repair App</h1>
           <p style={{"margin":"0em"}}>{versionText}</p>
         </header>
-        {(this.props.user === null) ? 
+        {(this.props.token === null) ? 
           (<div style={{height: '70vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
             {(this.state.newAccountForm === "closed") ? 
             (<LoginComponent createAccount={() => this.setState({newAccountForm: "open"})} />) 
@@ -62,7 +62,7 @@ class CarRepairApp extends Component {
           (<div>
             <LogoutComponent />
             <AuthorizedAppRouter />
-            <SubscriptionComponent />
+            {/* <SubscriptionComponent /> */}
           </div>)
         }
       </div>
@@ -72,18 +72,21 @@ class CarRepairApp extends Component {
 
 const mapStateToProps = function(state) {
   return {
-      user: state.user,
+      token: state.token,
       queryType: state.queryType
   }
 }
 
 const ConnectedApp = connect(mapStateToProps)(CarRepairApp);
+const {store, persistor} = reduxFunc();
 
 class App extends Component {
   render() {
     return (
       <Provider store={store}>
-        <ConnectedApp />
+        <PersistGate loading={null} persistor={persistor}>
+          <ConnectedApp />
+        </PersistGate>
       </Provider>
     )
   }

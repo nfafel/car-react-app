@@ -1,11 +1,13 @@
 import { createStore } from "redux";
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
 
 const LOGIN_USER = "LOGIN_USER";
 const LOGOUT_USER = "LOGOUT_USER";
 const SET_QUERY_TYPE = "SET_QUERY_TYPE";
 
 const initialState = {
-    user: null,
+    token: null,
     queryType: "rest"
 };
 
@@ -15,7 +17,7 @@ function rootReducer(state = initialState, action) {
             return Object.assign({}, state, action.payload);
 
         case LOGOUT_USER:
-            return Object.assign({}, state, {user: null});
+            return Object.assign({}, state, {token: null});
 
         case SET_QUERY_TYPE:
             return Object.assign({}, state, action.payload);
@@ -25,6 +27,15 @@ function rootReducer(state = initialState, action) {
     }
 };
 
-const store = createStore(rootReducer);
+const persistConfig = {
+    key: 'root',
+    storage,
+}
 
-export default store;
+const persistedReducer = persistReducer(persistConfig, rootReducer)
+
+export default () => {
+    let store = createStore(persistedReducer)
+    let persistor = persistStore(store)
+    return { store, persistor }
+}

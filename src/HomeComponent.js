@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './App.css';
 import { connect } from 'react-redux';
+import {logoutUser} from './redux/actions';
 
 const queryFunctions = require('./queryFuncForRepairsComponent')
 
@@ -15,15 +16,19 @@ class HomeComponent extends Component {
     
     async componentDidMount() {
         try {
-            const repairs = await queryFunctions.getRepairsData(this.props.user.phoneNumber);
-            const cars = await queryFunctions.getCarsData(this.props.user.phoneNumber);
+            const repairs = await queryFunctions.getRepairsData(this.props.token);
+            const cars = await queryFunctions.getCarsData(this.props.token);
 
             this.setState({
                 repairs: repairs,
                 cars: cars
             });
         } catch(err) {
-            console.log(err);
+            if (err.statusCode === 401) {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message)
         }
     }
 
@@ -96,8 +101,13 @@ class HomeComponent extends Component {
 
 const mapStateToProps = function(state) {
     return {
-        user: state.user
+        token: state.token
+    }
+}
+const mapDispatchToProps = function(dispatch) {
+    return {
+        logoutUser: () => dispatch(logoutUser()),
     }
 }
   
-export default connect(mapStateToProps)(HomeComponent);
+export default connect(mapStateToProps, mapDispatchToProps)(HomeComponent);

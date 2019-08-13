@@ -44,10 +44,11 @@ function GraphQLRepairs() {
   );
 }
 
-function Cars() {
+function Cars(queryType) {
+  var queryText = (queryType === 'rest') ? ("REST") : ("GraphQL");
   return (
     <div>
-      <h2>Cars - REST</h2>
+      <h2>Cars - {queryText}</h2>
       <CarsComponent />
     </div>
   );
@@ -82,7 +83,7 @@ class AuthorizedAppRouter extends Component {
           </nav>
 
           <Route path="/" exact component={HomeComponent} />
-          <Route path="/cars/" component={Cars} />
+          <Route path="/cars/" render={() => Cars(this.props.queryType)} />
           <Route path="/repairs/" component={RepairsComponent} />
         </div>
       </Router>
