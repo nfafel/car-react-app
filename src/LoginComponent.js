@@ -101,7 +101,7 @@ class LoginComponent extends Component {
                 Yup.object().shape({
                     phoneNumber: Yup.string()
                         .required('Required')
-                        .matches(/\([0-9]{3}\)-[0-9]{3}-[0-9]{4}/, 'Required Format: (XXX)-XXX-XXXX'),
+                        .matches(/^\([0-9]{3}\)-[0-9]{3}-[0-9]{4}$/, 'Required Format: (XXX)-XXX-XXXX'),
                     password: Yup.string()
                         .required('Required'),
                     queryType: Yup.string()
