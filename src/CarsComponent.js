@@ -7,8 +7,8 @@ import CarFormComponent from './CarFormComponent'
 import { connect } from 'react-redux';
 import {logoutUser} from './redux/actions';
 
-const restQueryFunctions = require('./queryFuncForCarsComponent');
-const graphQLQueryFunctions = require('./graphQLQueriesForCars');
+const restQueryFunctions = require('./Rest/queryFuncForCarsComponent');
+const graphQLQueryFunctions = require('./GraphQL/graphQLQueriesForCars');
 
 class CarsComponent extends Component {
     constructor(props) {
@@ -32,7 +32,7 @@ class CarsComponent extends Component {
             const cars = await this.queryFunctions.getCarsData(this.props.token);
             this.setState({ cars: cars })
         } catch(err) {
-            if (err.statusCode === 401) {
+            if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
                 setTimeout(() => alert("You have been automatically logged out. Please login in again."))
             }
@@ -58,7 +58,7 @@ class CarsComponent extends Component {
             //     this.queryFunctions.notifyCarChange("delete", car, this.props.user.phoneNumber)
             // }
         } catch(err) {
-            if (err.statusCode === 401) {
+            if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
                 setTimeout(() => alert("You have been automatically logged out. Please login in again."))
             }
@@ -100,7 +100,7 @@ class CarsComponent extends Component {
             //     this.queryFunctions.notifyCarChange("update", values, this.props.user.phoneNumber)
             // }
         } catch(err) {
-            if (err.statusCode === 401) {
+            if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
                 setTimeout(() => alert("You have been automatically logged out. Please login in again."))
             }
@@ -134,7 +134,7 @@ class CarsComponent extends Component {
             // }
 
         } catch(err) {
-            if (err.statusCode === 401) {
+            if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
                 setTimeout(() => alert("You have been automatically logged out. Please login in again."))
             }
@@ -153,7 +153,7 @@ class CarsComponent extends Component {
                 repairCarYear: car.year
             })
         } catch(err) {
-            if (err.statusCode === 401) {
+            if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
                 setTimeout(() => alert("You have been automatically logged out. Please login in again."))
             }

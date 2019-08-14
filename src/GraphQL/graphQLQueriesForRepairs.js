@@ -13,11 +13,14 @@ client.defaultOptions = {
   }
 }
 
-export const getRepairsData = async(phoneNumber) => {
+export const getRepairsData = async(token) => {
     const result = await client.query({
+        variables: {
+            authorization: `Bearer ${token}`
+        },
         query:gql`
             query {
-                repairs(phoneNumber: ${phoneNumber}) {
+                repairs {
                     _id
                     car {
                         _id
@@ -38,42 +41,33 @@ export const getRepairsData = async(phoneNumber) => {
     return result.data.repairs;
 };
 
-export const deleteData = async(repairId) => {
+export const deleteData = async(repairId, token) => {
     const result = await client.mutate({
+        variables: {
+            authorization: `Bearer ${token}`
+        },
         mutation:gql`
             mutation {
-                removeRepair(id: "${repairId}") {
-                    _id
-                    car {
-                        _id
-                        make
-                        model
-                        year
-                        rating
-                    }
-                    date
-                    description
-                    cost 
-                    progress
-                    technician
-                }
+                removeRepair(id: "${repairId}") 
             }
         `
     });
     return result.data.removeRepair;
 }
 
-export const putData = async(repairId, values, phoneNumber) => {
+export const putData = async(repairId, values, token) => {
     const result = await client.mutate({
-        variables: { input: {
-            phoneNumber: phoneNumber,
-            car_id: values.car_id,
-            description: values.description,
-            date: values.date,
-            cost: values.cost,
-            progress: values.progress,
-            technician: values.technician
-        }},
+        variables: {
+            authorization: `Bearer ${token}`,
+            input: {
+                car_id: values.car_id,
+                description: values.description,
+                date: values.date,
+                cost: values.cost,
+                progress: values.progress,
+                technician: values.technician
+            }
+        },
         mutation:gql`
             mutation UpdateRepairInput($input: RepairInput){
                 updateRepair(id: "${repairId}", input: $input) {
@@ -97,17 +91,19 @@ export const putData = async(repairId, values, phoneNumber) => {
     return result.data.updateRepair;
 }
 
-export const postData = async(values, phoneNumber) => {
+export const postData = async(values, token) => {
     const result = await client.mutate({
-        variables: { input: {
-            phoneNumber: phoneNumber,
-            car_id: values.car_id,
-            description: values.description,
-            date: values.date,
-            cost: parseInt(values.cost),
-            progress: values.progress,
-            technician: values.technician
-        }},
+        variables: { 
+            authorization: `Bearer ${token}`,
+            input: {
+                car_id: values.car_id,
+                description: values.description,
+                date: values.date,
+                cost: parseInt(values.cost),
+                progress: values.progress,
+                technician: values.technician
+            }
+        },
         mutation:gql`
             mutation NewRepairInput($input: RepairInput){
                 createRepair(input: $input) {

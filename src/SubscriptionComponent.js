@@ -1,13 +1,23 @@
 import React, {Component} from 'react';
 import './App.css';
 import { connect } from 'react-redux';
+const jwt = require('jsonwebtoken');
 
 class SubscriptionComponent extends Component {
     constructor(props){
       super(props);
       this.state = {
-        subscribed: this.props.user.subscribed
+        phoneNumber: null,
+        subscribed: null
       }
+    }
+
+    componentDidMount() {
+        const decoded = jwt.decode(this.props.token);
+        this.setState({ 
+            phoneNumber: decoded.payload.phoneNumber,
+            subscribed: decoded.payload.subscribed 
+        })
     }
 
     smsButtonStyle = {
@@ -20,7 +30,7 @@ class SubscriptionComponent extends Component {
     changeSubscription = async() => {
         this.setState({subscribed: !this.state.subscribed})
         try {
-            fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.props.user.phoneNumber}/changeSubscription`, {
+            fetch(`https://tranquil-caverns-41069.herokuapp.com/users/${this.state.phoneNumber}/changeSubscription`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -37,10 +47,10 @@ class SubscriptionComponent extends Component {
 
     render() {
         var subscriptionText;
-        if (this.state.subscribed === false) {
-            subscriptionText = 'Subscribe to Text Notifications';
-        } else {
+        if (this.state.subscribed) {
             subscriptionText = 'Unsubscribe from Text Notifications';
+        } else {
+            subscriptionText = 'Subscribe to Text Notifications';
         }
 
         return (
@@ -53,7 +63,7 @@ class SubscriptionComponent extends Component {
 
 const mapStateToProps = function(state) {
     return {
-        user: state.user
+        token: state.token
     }
 }
 

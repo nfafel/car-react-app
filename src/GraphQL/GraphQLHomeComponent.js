@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
+import { connect } from 'react-redux';
+import {logoutUser} from '../redux/actions';
 
 const queryFunctions = require('./graphQLQueriesForRepairs')
 
@@ -11,10 +13,17 @@ class HomeComponent extends Component {
         }
     }
     
-    componentDidMount() {
-        queryFunctions.getRepairsData()
-            .then(res => this.setState({ repairs: res }))
-            .catch(err => console.log(err)); 
+    async componentDidMount() {
+        try {
+            const repairs = await queryFunctions.getRepairsData(this.props.token);
+            this.setState({repairs: repairs});
+        } catch(err) {
+            if (err.message === "GraphQL error: Unauthorized") {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message);
+        }
     }
 
     tableStyles = {
@@ -80,6 +89,17 @@ class HomeComponent extends Component {
             </div>
         );
     }
-  }
+}
   
-  export default HomeComponent;
+const mapStateToProps = function(state) {
+    return {
+        token: state.token
+    }
+}
+const mapDispatchToProps = function(dispatch) {
+    return {
+        logoutUser: () => dispatch(logoutUser()),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeComponent);

@@ -1,7 +1,7 @@
 import { Field, ErrorMessage } from 'formik';
 import React, {Component} from 'react';
 
-const queryFunctions = require('./queryFuncForCarsComponent');
+const queryFunctions = require('./Rest/queryFuncForCarsComponent');
 
 class CarFormComponent extends Component {
     constructor(props){

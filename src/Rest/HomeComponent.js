@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
 import { connect } from 'react-redux';
-import {logoutUser} from './redux/actions';
+import {logoutUser} from '../redux/actions';
 
 const queryFunctions = require('./queryFuncForRepairsComponent')
 
@@ -34,13 +34,13 @@ class HomeComponent extends Component {
 
     tableStyles = {
         "width": "80%",
-        "border-collapse": "collapse",
+        "borderCollapse": "collapse",
         "border": "1px solid #dddddd",
         "margin": "1em auto"
     };
 
     rowColStyles = {
-        "border-collapse": "collapse",
+        "borderCollapse": "collapse",
         "border": "1px solid #dddddd"
     };
 

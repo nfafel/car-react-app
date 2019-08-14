@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { connect } from 'react-redux';
-import {logoutUser} from './redux/actions';
+import {logoutUser} from '../redux/actions';
 
-import RepairFormComponent from './RepairFormComponent'
+import RepairFormComponent from '../RepairFormComponent'
 
 const queryFunctions = require('./queryFuncForRepairsComponent');
 
@@ -176,7 +176,7 @@ class RepairsComponent extends Component {
     tableStyles() {
         return ({
             "width": "80%",
-            "border-collapse": "collapse",
+            "borderCollapse": "collapse",
             "border": "1px solid #dddddd",
             "margin": "1em auto"
         });
@@ -184,7 +184,7 @@ class RepairsComponent extends Component {
   
     rowColStyles() {
         return ({
-            "border-collapse": "collapse",
+            "borderCollapse": "collapse",
             "border": "1px solid #dddddd"
         });
     };
@@ -214,8 +214,8 @@ class RepairsComponent extends Component {
                     <td>{repair.progress}</td>
                     <td>{repair.technician}</td>
                     <td>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair)}>DELETE</button> 
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.callDeleteData(repair)}>DELETE</button> 
                     </td>
                 </tr>)
             }
@@ -254,7 +254,7 @@ class RepairsComponent extends Component {
 
     getNewRepairButton = (resetForm) => {
         if (!(this.state.shouldGetPostData || this.state.shouldGetPutData)) {
-            return (<button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>)
+            return (<button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>)
         }
     }
   

@@ -4,6 +4,9 @@ import { Formik, Form, Field, ErrorMessage} from 'formik';
 import * as Yup from 'yup';
 import {loginUser, setQueryType} from './redux/actions';
 import { connect } from 'react-redux';
+import { prepareLogin, login } from './Rest/restLoginFunc'
+import { prepareGraphQLLogin, graphQLLogin } from './GraphQL/graphQLLoginFunc'
+
 
 class LoginComponent extends Component {
     constructor(props) {
@@ -15,83 +18,6 @@ class LoginComponent extends Component {
             phoneNumber: null,
             token: null,
             incorrectGuesses: 0
-        }
-    }
-
-    prepareLogin = async(values) => { 
-        var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
-        
-        try{
-            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/login`, {
-                method: "POST",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phoneNumber: parsedNumber,
-                    password: values.password
-                })
-            })
-            const body = await userResponse.json();
-            if(body.message) {
-                alert(body.message)
-            } else {
-                this.confirmLogin(parsedNumber, body.token);
-            }
-
-        } catch(err) {
-            console.log(err)
-        }
-    }
-
-    confirmLogin = async(parsedNumber, token) => {
-        var confirmationNumber = Math.floor(Math.random() * 900000) + 100000;
-        try{
-            fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    confirmationNumber: confirmationNumber.toString()
-                })
-            });
-            this.setState({
-                phoneNumber: parsedNumber,
-                token: token,
-                confirmationNumber: confirmationNumber,
-                loginForm: 'closed',
-                confimationForm: 'open'
-            })
-        } catch(err) {
-            console.log(err)
-        }
-    }
-
-    login = async(values) => {
-        if (values.confirmationNumber === this.state.confirmationNumber) {
-            try {    
-                this.props.loginUser(this.state.token)
-            } catch(err) {
-                console.log(err)
-            }
-
-        } else {
-            if (this.state.incorrectGuesses < 2) {
-                alert("The confirmation number or password you provided is incorrect. Please try again.")
-                this.setState({
-                    incorrectGuesses: this.state.incorrectGuesses+1
-                })
-            } else {
-                alert("You have attempted to login too many times. Please restart.")
-                this.setState({
-                    incorrectGuesses: 0,
-                    passwordForm: "closed",
-                    confirmationNumber: null
-                })
-            }
         }
     }
 
@@ -131,35 +57,6 @@ class LoginComponent extends Component {
         "border": "solid", 
         "backgroundColor": "#cdf6f7", 
         "width": 500
-    }
-
-    testtest = async(values) => {
-        var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
-
-        try{
-            const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/login`, {
-                method: "POST",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phoneNumber: parsedNumber,
-                    password: values.password
-                })
-            })
-            const body = await userResponse.json();
-
-            if(body.message) {
-                alert(body.message)
-            } else {
-                this.props.setQueryType(values.queryType)
-                this.props.loginUser(body.token)
-            }
-
-        } catch(err) {
-            alert(err)
-        }
     }
 
     resetLogin = async(resetForm) => {
@@ -222,11 +119,20 @@ class LoginComponent extends Component {
     }
 
     handleSubmit = (values) => {
-        if (this.state.loginForm === "open") {
-            this.prepareLogin(values)
+        if (values.queryType === "rest") {
+            if (this.state.loginForm === "open") {
+                prepareLogin(values, this)
+            } else {
+                login(values, this)
+            }
         } else {
-            this.login(values)
+            if (this.state.loginForm === "open") {
+                prepareGraphQLLogin(values, this)
+            } else {
+                graphQLLogin(values, this)
+            }
         }
+        
     }
 
     render() {
@@ -234,10 +140,10 @@ class LoginComponent extends Component {
         return (
             <div>
                 <Formik
-                    initialValues = {{phoneNumber: '', password: '', queryType: 'rest', confirmationNumber: null}}
+                    initialValues = {{phoneNumber: '', password: '', queryType: 'rest', confirmationNumber: ''}}
                     validationSchema={this.loginValidationSchema()}
-                    //onSubmit = {(values) => this.handleSubmit(values)}
-                    onSubmit = {(values) => this.testtest(values)}
+                    onSubmit = {(values) => this.handleSubmit(values)}
+                    //onSubmit = {(values) => this.testtest(values)}
                 >
                     {(props) => 
                         this.getLoginForm(props.values, props.resetForm)

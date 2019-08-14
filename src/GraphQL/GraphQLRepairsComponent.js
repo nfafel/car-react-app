@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
-import './App.css';
+import '../App.css';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
-import RepairFormComponent from './RepairFormComponent'
+import { connect } from 'react-redux';
+import {logoutUser} from '../redux/actions';
+import RepairFormComponent from '../RepairFormComponent'
 
 const queryFunctions = require('./graphQLQueriesForRepairs');
 const queryFunctionsForCars = require('./graphQLQueriesForCars');
@@ -16,30 +18,42 @@ class RepairsComponent extends Component {
         mergedRepairs: null,
         shouldGetPostData: false,
         shouldGetPutData: false,
-        repairIdUpdate: null
+        repairUpdated: null
       }
     }
     
-    componentDidMount() {
-        queryFunctions.getRepairsData()
-            .then(res => this.setState({mergedRepairs: res }))
-            .catch(err => console.log(err))
+    async componentDidMount() {
+        try{
+            const repairs = await queryFunctions.getRepairsData(this.props.token);
+            const cars = await queryFunctionsForCars.getCarsData(this.props.token);
+            this.setState({ 
+                mergedRepairs: repairs,
+                cars: cars
+            })
+        } catch(err) {
+            if (err.message === "GraphQL error: Unauthorized") {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message);
+        }
     }
     
-    callDeleteData(repairId) {
-        queryFunctions.deleteData(repairId)
-            .then(res => this.setState({mergedRepairs: res}))
-            .catch(err => console.log(err));
+    callDeleteData = async(repairId) => {
+        try {
+            const deletedId = await queryFunctions.deleteData(repairId, this.props.token);
+            const newRepairs = this.state.mergedRepairs.filter(repair => repair._id !== deletedId);
+            this.setState({mergedRepairs: newRepairs});
+        } catch(err) {
+            if (err.message === "GraphQL error: Unauthorized") {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message);
+        }
     }
   
     getPutData(repair, setValues) {
-        queryFunctionsForCars.getCarsData()
-            .then(res => this.setState({
-                cars: res,
-                shouldGetPutData: true,
-                repairIdUpdate: repair._id
-            }))
-            .catch(err => console.log(err))
         setValues({
             car_id: repair.car._id,
             description: repair.description,
@@ -48,25 +62,36 @@ class RepairsComponent extends Component {
             progress: repair.progress,
             technician: repair.technician
         });
+        this.setState({
+            shouldGetPutData: true,
+            repairUpdated: repair
+        });
     }
   
-    callPutData(repairId, values) {
-        queryFunctions.putData(repairId, values)
-            .then(res => this.setState({
-                mergedRepairs: res, 
+    callPutData = async(repairId, values) => {
+        try {
+            const updatedRepair = await queryFunctions.putData(repairId, values, this.props.token);
+            const newRepairs = this.state.mergedRepairs.map((repair) => {
+                if (repair._id === updatedRepair._id) {
+                    return updatedRepair;
+                }
+                return repair;
+            })
+            this.setState({
+                mergedRepairs: newRepairs, 
                 shouldGetPutData: false,
-                repairIdUpdate: null
-            }))
-            .catch(err => alert(err));
+                repairUpdated: null
+            })
+        } catch(err) {
+            if (err.message === "GraphQL error: Unauthorized") {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message);
+        }
     }
   
     getPostData(resetForm) {
-        queryFunctionsForCars.getCarsData()
-            .then(res => this.setState({
-                cars: res,
-                shouldGetPostData: true
-            }))
-            .catch(err => console.log(err))
         resetForm({
             car_id: "",
             description: "",
@@ -75,21 +100,31 @@ class RepairsComponent extends Component {
             progress: "",
             technician: ""
         })
+        this.setState({shouldGetPostData: true});
     }
   
-    callPostData(values) {
-        queryFunctions.postData(values)
-            .then(res => this.setState({
-                mergedRepairs: res, 
+    callPostData = async(values) => {
+        try {
+            const newRepair = await queryFunctions.postData(values, this.props.token);
+            const newRepairs = this.state.mergedRepairs;
+            newRepairs.push(newRepair);
+            this.setState({
+                mergedRepairs: newRepairs, 
                 shouldGetPostData: false
-            }))
-            .catch(err => console.log(err));
+            })
+        } catch(err) {
+            if (err.message === "GraphQL error: Unauthorized") {
+                this.props.logoutUser();
+                setTimeout(() => alert("You have been automatically logged out. Please login in again."))
+            }
+            console.log(err.message);
+        }
     }
   
     tableStyles() {
         return ({
             "width": "80%",
-            "border-collapse": "collapse",
+            "borderCollapse": "collapse",
             "border": "1px solid #dddddd",
             "margin": "1em auto"
         });
@@ -97,14 +132,14 @@ class RepairsComponent extends Component {
   
     rowColStyles() {
         return ({
-            "border-collapse": "collapse",
+            "borderCollapse": "collapse",
             "border": "1px solid #dddddd"
         });
     };
 
     getRepairsDisplay = (setValues, values) => {
         var repairsDisplay = this.state.mergedRepairs.map((repair) => { 
-            if (this.state.shouldGetPutData && repair._id === this.state.repairIdUpdate) {
+            if (this.state.shouldGetPutData && repair._id === this.state.repairUpdated._id) {
                 return (<RepairFormComponent cars={this.state.cars} values={values} formType={"update"} cancel={() => this.setState({shouldGetPutData: false})} /> );
             } else if (this.state.shouldGetPostData || this.state.shouldGetPutData) {
                 return (
@@ -127,8 +162,8 @@ class RepairsComponent extends Component {
                     <td>{repair.progress}</td>
                     <td>{repair.technician}</td>
                     <td>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
-                        <button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
                     </td>
                 </tr>)
             }
@@ -143,7 +178,7 @@ class RepairsComponent extends Component {
       if (this.state.shouldGetPostData) {
         this.callPostData(values);
       } else {
-        this.callPutData(this.state.repairIdUpdate, values);
+        this.callPutData(this.state.repairUpdated._id, values);
       }
     }
   
@@ -167,7 +202,7 @@ class RepairsComponent extends Component {
 
     getNewRepairButton = (resetForm) => {
         if (!(this.state.shouldGetPostData || this.state.shouldGetPutData)) {
-            return (<button type="button" style={{"margin-bottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>)
+            return (<button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPostData(resetForm)}>NEW REPAIR</button>)
         }
     }
   
@@ -206,6 +241,17 @@ class RepairsComponent extends Component {
             </div>
         );
     }
-  }
+}
+
+const mapStateToProps = function(state) {
+    return {
+        token: state.token
+    }
+}
+const mapDispatchToProps = function(dispatch) {
+    return {
+        logoutUser: () => dispatch(logoutUser()),
+    }
+}
   
-  export default RepairsComponent;
+export default connect(mapStateToProps, mapDispatchToProps)(RepairsComponent);

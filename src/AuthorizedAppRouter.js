@@ -2,10 +2,10 @@ import React, {Component} from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import CarsComponent from './CarsComponent'
-import RepairsComponent from './RepairsComponent'
-import HomeComponent from './HomeComponent'
-import GraphQLRepairsComponent from './GraphQLRepairsComponent'
-import GraphQLHomeComponent from './GraphQLHomeComponent'
+import RepairsComponent from './Rest/RepairsComponent'
+import HomeComponent from './Rest/HomeComponent'
+import GraphQLRepairsComponent from './GraphQL/GraphQLRepairsComponent'
+import GraphQLHomeComponent from './GraphQL/GraphQLHomeComponent'
 import { connect } from 'react-redux';
 
 function RestHome() {
@@ -55,7 +55,7 @@ function Cars(queryType) {
 }
   
 class AuthorizedAppRouter extends Component {
-  render () {
+  render () {    
     var HomeComponent;
     var RepairsComponent;
     if (this.props.queryType === "rest") {

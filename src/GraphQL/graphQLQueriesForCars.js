@@ -13,11 +13,14 @@ client.defaultOptions = {
   }
 }
 
-export const getCarsData = async(phoneNumber) => {
+export const getCarsData = async(token) => {
   const result = await client.query({
+    variables: {
+      authorization: `Bearer ${token}`
+    },
     query: gql`
       query {
-        cars(phoneNumber: ${phoneNumber}) {
+        cars {
           _id 
           make
           model 
@@ -30,32 +33,31 @@ export const getCarsData = async(phoneNumber) => {
   return result.data.cars;
 };
 
-export const deleteData = async(carId) => {
+export const deleteData = async(carId, token) => {
   const result = await client.mutate({
+    variables: {
+      authorization: `Bearer ${token}`
+    },
     mutation: gql` 
       mutation {
-        removeCar(id: "${carId}") {
-          _id 
-          make
-          model 
-          year
-          rating
-        }
+        removeCar(id: "${carId}")
       }
     `
   });
   return result.data.removeCar;
 }
 
-export const putData = async(carId, values, phoneNumber) => {
+export const putData = async(carId, values, token) => {
   const result = await client.mutate({
-    variables: {input: {
-      phoneNumber: phoneNumber,
-      make: values.make,
-      model: values.model,
-      year: parseInt(values.year),
-      rating: parseInt(values.rating)
-    }},
+    variables: {
+      authorization: `Bearer ${token}`,
+      input: {
+        make: values.make,
+        model: values.model,
+        year: parseInt(values.year),
+        rating: parseInt(values.rating)
+      }
+    },
     mutation: gql`
       mutation CarUpdatesInput($input: CarInput){
         updateCar(id: "${carId}", input: $input) {
@@ -71,15 +73,17 @@ export const putData = async(carId, values, phoneNumber) => {
   return result.data.updateCar;
 }
 
-export const postData = async(values, phoneNumber) => {
+export const postData = async(values, token) => {
   const result = await client.mutate({
-    variables: {input: {
-      phoneNumber: phoneNumber,
-      make: values.make,
-      model: values.model,
-      year: parseInt(values.year),
-      rating: parseInt(values.rating)
-    }},
+    variables: {
+      authorization: `Bearer ${token}`,
+      input: {
+        make: values.make,
+        model: values.model,
+        year: parseInt(values.year),
+        rating: parseInt(values.rating)
+      }
+    },
     mutation: gql`
       mutation NewCarInput($input: CarInput){
         createCar(input: $input) {
@@ -95,8 +99,11 @@ export const postData = async(values, phoneNumber) => {
   return result.data.createCar;
 }
 
-export const getRepairsForCar = async(repairsForCarId) => {
+export const getRepairsForCar = async(repairsForCarId, token) => {
   const result = await client.query({
+    variables: {
+      authorization: `Bearer ${token}`
+    },
     query: gql`
       query {
         repairsForCar(carId: "${repairsForCarId}") {

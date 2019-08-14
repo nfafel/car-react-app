@@ -62,7 +62,7 @@ class CarRepairApp extends Component {
           (<div>
             <LogoutComponent />
             <AuthorizedAppRouter />
-            {/* <SubscriptionComponent /> */}
+            <SubscriptionComponent />
           </div>)
         }
       </div>
