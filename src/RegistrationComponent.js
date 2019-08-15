@@ -167,24 +167,23 @@ class RegistrationComponent extends Component {
         return (
             <div style={this.formStyle}>
                 <Formik
-                initialValues = {{phoneNumber: '', confirmationNumber: '', password: '', confirmPassword: ''}}
-                validationSchema={this.registrationValidationSchema()}
-                onSubmit = {(values) => this.handleSubmit(values)}
-            >
-            {(props) => (
-                <Form>
-                    {this.getFormFields(props.values)}
-                    <div style={{margin: 15}}>
-                        <button style={{marginRight: 4}} type="button" onClick={() => this.props.cancel()}>Cancel</button>
-                        <button type="submit">{(this.state.confirmationForm === 'open') ? ("Register") : ("Next")}</button>
-                    </div>
-                </Form>
-            )}
-            </Formik>
+                    initialValues = {{phoneNumber: '', confirmationNumber: '', password: '', confirmPassword: ''}}
+                    validationSchema={this.registrationValidationSchema()}
+                    onSubmit = {(values) => this.handleSubmit(values)}
+                >
+                {(props) => (
+                    <Form>
+                        {this.getFormFields(props.values)}
+                        <div style={{margin: 15}}>
+                            <button style={{marginRight: 4}} type="button" onClick={() => this.props.cancel()}>Cancel</button>
+                            <button type="submit">{(this.state.confirmationForm === 'open') ? ("Register") : ("Next")}</button>
+                        </div>
+                    </Form>
+                )}
+                </Formik>
             </div>
         )
     }
-
 }
 
 const mapDispatchToProps = function(dispatch) {

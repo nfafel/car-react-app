@@ -104,21 +104,21 @@ exports.postData = async(values, token) => {
     return body.repair;
 }
 
-// exports.notifyRepairChange = async(crudType, repair, car, phoneNumber) => {
-//     try {
-//         fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${phoneNumber}/notifyRepair`, {
-//             method: 'POST',
-//             headers: {
-//                 'Accept': 'application/json',
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({
-//                 crudType: crudType,
-//                 car: `${car.year} ${car.make} ${car.model}`,
-//                 description: `${repair.description}`
-//             })
-//         });
-//     } catch(err) {
-//         console.log(err);
-//     }
-// }
+exports.notifyRepairChange = async(crudType, repair, car, phoneNumber) => {
+    try {
+        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${phoneNumber}/notifyRepair`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                crudType: crudType,
+                car: `${car.year} ${car.make} ${car.model}`,
+                description: `${repair.description}`
+            })
+        });
+    } catch(err) {
+        console.log(err);
+    }
+}

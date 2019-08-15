@@ -73,10 +73,9 @@ class RepairsComponent extends Component {
 
             this.setState({ mergedRepairs: newMergedRepairs});
 
-            // if (this.props.user.subscribed) {
-            //     var car = this.getCarForRepair(repair.car._id, this.state.cars);
-            //     queryFunctions.notifyRepairChange("delete", repair, car, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("delete", repair, repair.car, this.props.phoneNumber)
+            }
 
         } catch(err) {
             if (err.statusCode === 401) {
@@ -121,10 +120,9 @@ class RepairsComponent extends Component {
                 repairUpdated: null
             });
 
-            // if (this.props.user.subscribed) {
-            //     var car = this.getCarForRepair(values.car_id, this.state.cars);
-            //     queryFunctions.notifyRepairChange("update", values, car, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("update", values, carForRepair, this.props.phoneNumber)
+            }
         } catch(err) {
             if (err.statusCode === 401) {
                 this.props.logoutUser();
@@ -160,10 +158,9 @@ class RepairsComponent extends Component {
                 shouldGetPostData: false
             });
 
-            // if (this.props.user.subscribed) {
-            //     var car = this.getCarForRepair(values.car_id, this.state.cars);
-            //     queryFunctions.notifyRepairChange("create", values, car, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("create", values, carForRepair, this.props.phoneNumber)
+            }
         } catch(err) {
             if (err.statusCode === 401) {
                 this.props.logoutUser();
@@ -297,7 +294,9 @@ class RepairsComponent extends Component {
   
 const mapStateToProps = function(state) {
     return {
-        token: state.token
+        token: state.token,
+        subscribed: state.subscribed,
+        phoneNumber: state.phoneNumber
     }
 }
 const mapDispatchToProps = function(dispatch) {

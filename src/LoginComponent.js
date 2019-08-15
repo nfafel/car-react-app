@@ -6,7 +6,7 @@ import {loginUser, setQueryType} from './redux/actions';
 import { connect } from 'react-redux';
 import { prepareLogin, login } from './Rest/restLoginFunc'
 import { prepareGraphQLLogin, graphQLLogin } from './GraphQL/graphQLLoginFunc'
-
+const jwt = require('jsonwebtoken');
 
 class LoginComponent extends Component {
     constructor(props) {
@@ -157,7 +157,14 @@ class LoginComponent extends Component {
 
 const mapDispatchToProps = function(dispatch) {
     return {
-        loginUser: token => dispatch(loginUser({token: token})),
+        loginUser: (token) => {
+            const decoded = jwt.decode(token);
+            dispatch( loginUser({
+                token: token, 
+                subscribed: decoded.payload.subscribed,
+                phoneNumber: decoded.payload.phoneNumber
+            }))
+        },
         setQueryType: queryType => dispatch(setQueryType({queryType: queryType}))
     }
 }

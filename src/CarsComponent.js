@@ -54,9 +54,9 @@ class CarsComponent extends Component {
                 this.setState({ cars: newCarsData });
             }
 
-            // if (this.props.user.subscribed) {
-            //     this.queryFunctions.notifyCarChange("delete", car, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                this.queryFunctions.notifyCarChange("delete", car, this.props.phoneNumber)
+            }
         } catch(err) {
             if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
@@ -96,9 +96,9 @@ class CarsComponent extends Component {
                 carIdUpdate: null
             })
 
-            // if (this.props.user.subscribed) {
-            //     this.queryFunctions.notifyCarChange("update", values, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                this.queryFunctions.notifyCarChange("update", values, this.props.phoneNumber)
+            }
         } catch(err) {
             if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
@@ -129,9 +129,9 @@ class CarsComponent extends Component {
                 shouldGetPostData: false,
             })
 
-            // if (this.props.user.subscribed) {
-            //     this.queryFunctions.notifyCarChange("create", values, this.props.user.phoneNumber)
-            // }
+            if (this.props.subscribed) {
+                this.queryFunctions.notifyCarChange("create", values, this.props.phoneNumber)
+            }
 
         } catch(err) {
             if (err.statusCode === 401 || err.message === "GraphQL error: Unauthorized") {
@@ -287,7 +287,9 @@ class CarsComponent extends Component {
 const mapStateToProps = function(state) {
     return {
         token: state.token,
-        queryType: state.queryType
+        queryType: state.queryType,
+        subscribed: state.subscribed,
+        phoneNumber: state.phoneNumber
     }
 }
 const mapDispatchToProps = function(dispatch) {

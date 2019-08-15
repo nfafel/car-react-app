@@ -162,3 +162,21 @@ export const getAllCarModels = async(make, year) => {
   });
   return result.data.allModels;
 };
+
+export const notifyCarChange = async(crudType, values, phoneNumber) => {
+  try {
+    fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${phoneNumber}/notifyCar`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        crudType: crudType,
+        car: `${values.year} ${values.make} ${values.model}`
+      })
+    });
+  } catch(err) {
+    alert(err)
+  }
+}

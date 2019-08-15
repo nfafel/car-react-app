@@ -39,11 +39,16 @@ class RepairsComponent extends Component {
         }
     }
     
-    callDeleteData = async(repairId) => {
+    callDeleteData = async(repair) => {
         try {
-            const deletedId = await queryFunctions.deleteData(repairId, this.props.token);
+            const deletedId = await queryFunctions.deleteData(repair._id, this.props.token);
             const newRepairs = this.state.mergedRepairs.filter(repair => repair._id !== deletedId);
             this.setState({mergedRepairs: newRepairs});
+
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("delete", repair, repair.car, this.props.phoneNumber)
+            }
+
         } catch(err) {
             if (err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
@@ -82,6 +87,11 @@ class RepairsComponent extends Component {
                 shouldGetPutData: false,
                 repairUpdated: null
             })
+
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("delete", updatedRepair, updatedRepair.car, this.props.phoneNumber)
+            }
+
         } catch(err) {
             if (err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
@@ -112,6 +122,10 @@ class RepairsComponent extends Component {
                 mergedRepairs: newRepairs, 
                 shouldGetPostData: false
             })
+
+            if (this.props.subscribed) {
+                queryFunctions.notifyRepairChange("delete", newRepair, newRepair.car, this.props.phoneNumber)
+            }
         } catch(err) {
             if (err.message === "GraphQL error: Unauthorized") {
                 this.props.logoutUser();
@@ -163,7 +177,7 @@ class RepairsComponent extends Component {
                     <td>{repair.technician}</td>
                     <td>
                         <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.getPutData(repair, setValues)}>EDIT</button>
-                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.callDeleteData(repair._id)}>DELETE</button> 
+                        <button type="button" style={{"marginBottom":"1em"}} onClick={() => this.callDeleteData(repair)}>DELETE</button> 
                     </td>
                 </tr>)
             }
@@ -245,7 +259,9 @@ class RepairsComponent extends Component {
 
 const mapStateToProps = function(state) {
     return {
-        token: state.token
+        token: state.token,
+        subscribed: state.subscribed,
+        phoneNumber: state.phoneNumber
     }
 }
 const mapDispatchToProps = function(dispatch) {
