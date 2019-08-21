@@ -74,17 +74,17 @@ class RegistrationComponent extends Component {
             registrationForm: "closed",
             confirmationForm: "open"
         })
-        alert(confirmationNumber)
-        // fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         confirmationNumber: confirmationNumber.toString()
-        //     })
-        // });
+        
+        fetch(`https://tranquil-caverns-41069.herokuapp.com/sms/${parsedNumber}/sendConfirmation`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                confirmationNumber: confirmationNumber.toString()
+            })
+        });
     }
 
     confirmRegistration = async(values) => {
