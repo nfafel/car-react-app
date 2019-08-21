@@ -83,8 +83,13 @@ exports.postData = async(values, token) => {
     return body.car;
 }
 
-exports.getRepairsForCar = async(repairsForCarId) => {
-  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`);
+exports.getRepairsForCar = async(repairsForCarId, token) => {
+  const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   const body = await response.json();
 
   if (response.status !== 200) {
