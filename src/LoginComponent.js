@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import { Formik, Form, Field, ErrorMessage} from 'formik';
 import * as Yup from 'yup';
-import {loginUser, setQueryType} from './redux/actions';
+import {loginUser} from './redux/actions';
 import { connect } from 'react-redux';
 import { prepareLogin, login } from './Rest/restLoginFunc'
 import { prepareGraphQLLogin, graphQLLogin } from './GraphQL/graphQLLoginFunc'
