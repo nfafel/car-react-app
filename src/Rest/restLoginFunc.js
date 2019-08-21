@@ -1,4 +1,4 @@
-exports.prepareLogin = async(values, context) => { 
+export const prepareLogin = async(values, context) => { 
     var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
     
     try{
@@ -50,7 +50,7 @@ const confirmLogin = async(parsedNumber, token, context) => {
     }
 }
 
-exports.login = async(values, context) => {
+export const login = async(values, context) => {
     if (values.confirmationNumber === context.state.confirmationNumber) {
         try {
             context.props.loginUser(context.state.token, values.queryType);
