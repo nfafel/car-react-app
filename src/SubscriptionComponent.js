@@ -37,7 +37,6 @@ class SubscriptionComponent extends Component {
                 },
                 body: JSON.stringify({
                     subscribed: !this.props.subscribed,
-                    phoneNumber: this.state.phoneNumber
                 })
             });
             const newSubscription = await subscriptionResponse.json()

@@ -1,23 +1,8 @@
-import ApolloClient, {gql} from "apollo-boost";
+import gql from "graphql-tag";
+import client from './apolloClient'
 
-const client = new ApolloClient({
-  uri: "https://tranquil-caverns-41069.herokuapp.com/graphql"
-});
-
-client.defaultOptions = {
-  watchQuery: {
-    fetchPolicy: 'network-only'
-  },
-  query: {
-    fetchPolicy: 'network-only'
-  }
-}
-
-export const getCarsData = async(token) => {
+export const getCarsData = async() => {
   const result = await client.query({
-    variables: {
-      authorization: `Bearer ${token}`
-    },
     query: gql`
       query {
         cars {
@@ -33,11 +18,8 @@ export const getCarsData = async(token) => {
   return result.data.cars;
 };
 
-export const deleteData = async(carId, token) => {
+export const deleteData = async(carId) => {
   const result = await client.mutate({
-    variables: {
-      authorization: `Bearer ${token}`
-    },
     mutation: gql` 
       mutation {
         removeCar(id: "${carId}")
@@ -47,10 +29,9 @@ export const deleteData = async(carId, token) => {
   return result.data.removeCar;
 }
 
-export const putData = async(carId, values, token) => {
+export const putData = async(carId, values) => {
   const result = await client.mutate({
     variables: {
-      authorization: `Bearer ${token}`,
       input: {
         make: values.make,
         model: values.model,
@@ -73,10 +54,9 @@ export const putData = async(carId, values, token) => {
   return result.data.updateCar;
 }
 
-export const postData = async(values, token) => {
+export const postData = async(values) => {
   const result = await client.mutate({
     variables: {
-      authorization: `Bearer ${token}`,
       input: {
         make: values.make,
         model: values.model,
@@ -99,11 +79,8 @@ export const postData = async(values, token) => {
   return result.data.createCar;
 }
 
-export const getRepairsForCar = async(repairsForCarId, token) => {
+export const getRepairsForCar = async(repairsForCarId) => {
   const result = await client.query({
-    variables: {
-      authorization: `Bearer ${token}`
-    },
     query: gql`
       query {
         repairsForCar(carId: "${repairsForCarId}") {

@@ -1,23 +1,8 @@
-import ApolloClient, {gql} from "apollo-boost";
+import gql from "graphql-tag";
+import client from './apolloClient'
 
-const client = new ApolloClient({
-  uri: "https://tranquil-caverns-41069.herokuapp.com/graphql"
-});
-
-client.defaultOptions = {
-  watchQuery: {
-    fetchPolicy: 'network-only'
-  },
-  query: {
-    fetchPolicy: 'network-only'
-  }
-}
-
-export const getRepairsData = async(token) => {
+export const getRepairsData = async() => {
     const result = await client.query({
-        variables: {
-            authorization: `Bearer ${token}`
-        },
         query:gql`
             query {
                 repairs {
@@ -41,11 +26,8 @@ export const getRepairsData = async(token) => {
     return result.data.repairs;
 };
 
-export const deleteData = async(repairId, token) => {
+export const deleteData = async(repairId) => {
     const result = await client.mutate({
-        variables: {
-            authorization: `Bearer ${token}`
-        },
         mutation:gql`
             mutation {
                 removeRepair(id: "${repairId}") 
@@ -55,10 +37,9 @@ export const deleteData = async(repairId, token) => {
     return result.data.removeRepair;
 }
 
-export const putData = async(repairId, values, token) => {
+export const putData = async(repairId, values) => {
     const result = await client.mutate({
         variables: {
-            authorization: `Bearer ${token}`,
             input: {
                 car_id: values.car_id,
                 description: values.description,
@@ -91,10 +72,9 @@ export const putData = async(repairId, values, token) => {
     return result.data.updateRepair;
 }
 
-export const postData = async(values, token) => {
+export const postData = async(values) => {
     const result = await client.mutate({
         variables: { 
-            authorization: `Bearer ${token}`,
             input: {
                 car_id: values.car_id,
                 description: values.description,

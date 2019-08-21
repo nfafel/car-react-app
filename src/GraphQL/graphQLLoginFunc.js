@@ -1,17 +1,5 @@
-import ApolloClient, {gql} from "apollo-boost";
-
-const client = new ApolloClient({
-  uri: "https://tranquil-caverns-41069.herokuapp.com/graphql"
-});
-
-client.defaultOptions = {
-  watchQuery: {
-    fetchPolicy: 'network-only'
-  },
-  query: {
-    fetchPolicy: 'network-only'
-  }
-}
+import gql from "graphql-tag";
+import client from './apolloClient';
 
 export const prepareGraphQLLogin = async(values, context) => { 
     var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
@@ -61,11 +49,10 @@ const confirmGraphQLLogin = async(parsedNumber, token, context) => {
     }
 }
 
-export const graphQLLogin = async(values, context) => {
+export const graphQLLogin = (values, context) => {
     if (values.confirmationNumber === context.state.confirmationNumber) {
         try { 
-            context.props.setQueryType(values.queryType);   
-            context.props.loginUser(context.state.token);
+            context.props.loginUser(context.state.token, values.queryType);
         } catch(err) {
             console.log(err)
         }

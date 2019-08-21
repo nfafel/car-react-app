@@ -143,7 +143,6 @@ class LoginComponent extends Component {
                     initialValues = {{phoneNumber: '', password: '', queryType: 'rest', confirmationNumber: ''}}
                     validationSchema={this.loginValidationSchema()}
                     onSubmit = {(values) => this.handleSubmit(values)}
-                    //onSubmit = {(values) => this.testtest(values)}
                 >
                     {(props) => 
                         this.getLoginForm(props.values, props.resetForm)
@@ -157,15 +156,15 @@ class LoginComponent extends Component {
 
 const mapDispatchToProps = function(dispatch) {
     return {
-        loginUser: (token) => {
+        loginUser: (token, queryType) => {
             const decoded = jwt.decode(token);
             dispatch( loginUser({
                 token: token, 
                 subscribed: decoded.payload.subscribed,
-                phoneNumber: decoded.payload.phoneNumber
+                phoneNumber: decoded.payload.phoneNumber,
+                queryType: queryType
             }))
         },
-        setQueryType: queryType => dispatch(setQueryType({queryType: queryType}))
     }
 }
   

@@ -8,7 +8,7 @@ const SET_QUERY_TYPE = "SET_QUERY_TYPE";
 const CHANGE_SUBSCRIPTION = "CHANGE_SUBSCRIPTION";
 
 const initialState = {
-    token: null,
+    token: "",
     queryType: "rest",
     subscribed: null,
     phoneNumber: null
@@ -17,10 +17,12 @@ const initialState = {
 function rootReducer(state = initialState, action) {
     switch(action.type) {
         case LOGIN_USER:
+            console.log("login_user", action.payload)
+
             return Object.assign({}, state, action.payload);
 
         case LOGOUT_USER:
-            return Object.assign({}, state, {token: null, subscribed: null});
+            return Object.assign({}, state, {token: "", subscribed: null});
 
         case SET_QUERY_TYPE:
             return Object.assign({}, state, action.payload);
@@ -40,8 +42,6 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
-export default () => {
-    let store = createStore(persistedReducer)
-    let persistor = persistStore(store)
-    return { store, persistor }
-}
+let store = createStore(persistedReducer)
+export const persistor = persistStore(store);
+export default store;

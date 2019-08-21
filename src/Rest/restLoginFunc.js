@@ -53,8 +53,7 @@ const confirmLogin = async(parsedNumber, token, context) => {
 exports.login = async(values, context) => {
     if (values.confirmationNumber === context.state.confirmationNumber) {
         try {
-            context.props.setQueryType(values.queryType); 
-            context.props.loginUser(context.state.token);
+            context.props.loginUser(context.state.token, values.queryType);
         } catch(err) {
             console.log(err)
         }

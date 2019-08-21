@@ -8,7 +8,7 @@ class LogoutComponent extends Component {
     render() {
         return (
             <div style={{float: 'right'}}>
-                <button type="button" style={{ marginTop: 10, marginRight: 10, height: 30, width: 70, fontSize: 16}} onClick={() => this.props.logoutUser()}>Logout</button>
+                <button type="button" style={{ marginTop: 10, marginRight: 10, height: 30, width: 70, fontSize: 16}} onClick={() => {this.props.logoutUser()}}>Logout</button>
             </div>
         )
     }
