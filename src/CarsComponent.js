@@ -163,7 +163,7 @@ class CarsComponent extends Component {
 
     showRepairsForCar = () => {
         if (this.state.repairsForCar != null) {
-            return (<RepairsByCarComponent repairsForCar={this.state.repairsForCar} repairCarMake={this.state.repairCarMake} repairCarModel={this.state.repairCarModel} repairCarYear={this.state.repairCarYear} rowColStyles={this.rowColStyles} tableStyles={this.tableStyles} />);
+            return (<RepairsByCarComponent hideRepairs={() => this.setState({repairsForCar: null})} repairsForCar={this.state.repairsForCar} repairCarMake={this.state.repairCarMake} repairCarModel={this.state.repairCarModel} repairCarYear={this.state.repairCarYear} rowColStyles={this.rowColStyles} tableStyles={this.tableStyles} />);
         } else {
             return (<br></br>)
         }

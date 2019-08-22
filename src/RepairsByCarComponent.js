@@ -21,7 +21,12 @@ class RepairsByCarComponent extends Component {
 
     render() {
         if (this.props.repairsForCar[0] === undefined) {
-            return (<h3>No Repairs Recorded for the {this.props.repairCarYear} {this.props.repairCarMake} {this.props.repairCarModel}</h3>);
+            return (
+                <div>
+                    <h3>No Repairs Recorded for the {this.props.repairCarYear} {this.props.repairCarMake} {this.props.repairCarModel}</h3>
+                    <button type="button" onClick={() => this.props.hideRepairs()}>Hide Repairs</button>
+                </div>
+            );
         }
         return(
             <div>
@@ -36,6 +41,7 @@ class RepairsByCarComponent extends Component {
                     </tr>
                     {this.getRepairTableRows()}
                 </table>
+                <button type="button" onClick={() => this.props.hideRepairs()}>Hide Repairs</button>
             </div>
         );
     }
