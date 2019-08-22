@@ -85,7 +85,7 @@ exports.postData = async(values, token) => {
 
 exports.getRepairsForCar = async(repairsForCarId, token) => {
   const response = await fetch(`https://tranquil-caverns-41069.herokuapp.com/repairs/${repairsForCarId}/repairsForCar`, {
-    method: 'DELETE',
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
     }
