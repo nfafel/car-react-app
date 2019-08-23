@@ -1,6 +1,5 @@
 export const prepareLogin = async(values, context) => { 
     var parsedNumber = `1${values.phoneNumber.replace(/-|\(|\)/g, "")}`;
-    
     try{
         const userResponse = await fetch(`https://tranquil-caverns-41069.herokuapp.com/users/login`, {
             method: "POST",
